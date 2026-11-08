@@ -615,41 +615,103 @@
   })();
 
   /* ---------------- Son (synthétisé, aucun fichier) ---------------- */
-  function fartSound(ac, t) {
-    var dur = 0.85 + Math.random() * 0.3;
-    var out = ac.createGain(); out.gain.value = 0.55; out.connect(ac.destination);
-    var env = ac.createGain();
-    env.gain.setValueAtTime(0.0001, t);
-    env.gain.exponentialRampToValueAtTime(1, t + 0.025);
-    env.gain.setValueAtTime(1, t + dur * 0.55);
-    env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    env.connect(out);
-    var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 6;
-    lp.frequency.setValueAtTime(1100, t); lp.frequency.exponentialRampToValueAtTime(260, t + dur);
-    lp.connect(env);
+  function fartSound(ac, t0) {
+    // Un pet en trois temps : couinement aigu, crachotements qui descendent,
+    // puis fin grave, grasse et mouillée. Tiré au hasard : jamais deux fois le même.
+    var R = Math.random;
+    function lerp(a, b, p) { return a + (b - a) * p; }
 
-    // grondement : dent de scie grave qui descend
-    var osc = ac.createOscillator(); osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(105, t); osc.frequency.exponentialRampToValueAtTime(52, t + dur);
-    var wob = ac.createOscillator(); wob.frequency.value = 7;
-    var wobDepth = ac.createGain(); wobDepth.gain.value = 18;
-    wob.connect(wobDepth); wobDepth.connect(osc.frequency);
-    // « brrr » : modulation d'amplitude en créneaux
+    var limiter = ac.createDynamicsCompressor();
+    limiter.threshold.value = -12; limiter.knee.value = 6; limiter.ratio.value = 12;
+    limiter.attack.value = 0.003; limiter.release.value = 0.12;
+    limiter.connect(ac.destination);
+    var out = ac.createGain(); out.gain.value = 0.9; out.connect(limiter);
+    var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 5; lp.connect(out);
+    var amp = ac.createGain(); amp.gain.setValueAtTime(0, t0); amp.connect(lp);   // voix
+    var wet = ac.createGain(); wet.gain.setValueAtTime(0, t0); wet.connect(lp);   // souffle mouillé
+
+    // voix : dent de scie + créneau à l'octave basse, hachés par un « brrr »
+    var saw = ac.createOscillator(); saw.type = 'sawtooth';
+    var sq = ac.createOscillator(); sq.type = 'square';
+    var sqGain = ac.createGain(); sqGain.gain.setValueAtTime(0.15, t0);
+    var vca = ac.createGain(); vca.gain.value = 0.5;
     var flutter = ac.createOscillator(); flutter.type = 'square';
-    flutter.frequency.setValueAtTime(34, t); flutter.frequency.linearRampToValueAtTime(16, t + dur);
-    var flutDepth = ac.createGain(); flutDepth.gain.value = 0.45;
-    var vca = ac.createGain(); vca.gain.value = 0.55;
-    flutter.connect(flutDepth); flutDepth.connect(vca.gain);
-    osc.connect(vca); vca.connect(lp);
-    // souffle
-    var len = Math.floor(ac.sampleRate * dur), buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
-    for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-    var noise = ac.createBufferSource(); noise.buffer = buf;
-    var bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 350; bp.Q.value = 1.2;
-    var nGain = ac.createGain(); nGain.gain.value = 0.25;
-    noise.connect(bp); bp.connect(nGain); nGain.connect(lp);
+    var fDepth = ac.createGain(); fDepth.gain.setValueAtTime(0.3, t0);
+    flutter.connect(fDepth); fDepth.connect(vca.gain);
+    saw.connect(vca); sq.connect(sqGain); sqGain.connect(vca); vca.connect(amp);
 
-    [osc, wob, flutter, noise].forEach(function (n) { n.start(t); n.stop(t + dur + 0.05); });
+    // souffle : bruit filtré
+    var total = 2.2, len = Math.floor(ac.sampleRate * total);
+    var buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = R() * 2 - 1;
+    var noise = ac.createBufferSource(); noise.buffer = buf;
+    var bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 0.9;
+    noise.connect(bp); bp.connect(wet);
+
+    function pitch(f1, f2, at, dur) {
+      saw.frequency.setValueAtTime(f1, at); saw.frequency.linearRampToValueAtTime(f2, at + dur);
+      sq.frequency.setValueAtTime(f1 / 2, at); sq.frequency.linearRampToValueAtTime(f2 / 2, at + dur);
+    }
+    function bubble(at, hi, lo, vol) {
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(hi, at); o.frequency.exponentialRampToValueAtTime(lo, at + 0.04);
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(vol, at + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + 0.05);
+      o.connect(g); g.connect(lp);
+      o.start(at); o.stop(at + 0.06);
+    }
+
+    // 1. couinement aigu
+    var t = t0, sq0 = 0.2 + R() * 0.12;
+    pitch(560 + R() * 120, 400 + R() * 60, t, sq0);
+    flutter.frequency.setValueAtTime(70, t);
+    lp.frequency.setValueAtTime(4200, t);
+    bp.frequency.setValueAtTime(2200, t);
+    amp.gain.setTargetAtTime(0.55, t, 0.01);
+    wet.gain.setTargetAtTime(0.06, t, 0.02);
+    t += sq0;
+
+    // 2 et 3. crachotements de plus en plus graves, gras et mouillés
+    var segs = 11 + Math.floor(R() * 4);
+    for (var k = 0; k < segs; k++) {
+      var p = (k + 1) / segs, wetP = p * p;
+      var dur = lerp(0.05, 0.11, p) + R() * 0.07;
+      var gap = R() < lerp(0.25, 0.55, p) ? 0.012 + R() * lerp(0.03, 0.07, p) : 0;
+      var f1 = lerp(400, 72, Math.pow(p, 0.8)) * (0.85 + R() * 0.3);
+      var vol = (0.6 + R() * 0.4) * lerp(0.55, 1, p);
+
+      pitch(f1, f1 * (0.75 + R() * 0.35), t, dur);
+      flutter.frequency.setValueAtTime(lerp(60, 17, p) + R() * 10, t);
+      fDepth.gain.setValueAtTime(lerp(0.3, 0.5, p), t);
+      sqGain.gain.setValueAtTime(lerp(0.15, 0.6, p), t);          // plus de graves = plus gras
+      lp.frequency.setTargetAtTime(lerp(3500, 480, p), t, 0.03);  // de plus en plus étouffé
+      bp.frequency.setTargetAtTime(lerp(1800, 380, p), t, 0.03);
+
+      amp.gain.setTargetAtTime(vol, t, 0.006);
+      wet.gain.setTargetAtTime(lerp(0.08, 0.6, wetP) * (0.7 + R() * 0.6), t, 0.01);
+      if (gap) {
+        amp.gain.setTargetAtTime(0, t + dur, 0.005);
+        wet.gain.setTargetAtTime(lerp(0, 0.2, wetP), t + dur, 0.008);
+      }
+      // bulles : rares au début, nombreuses et graves à la fin
+      var nb = Math.floor(wetP * 4 + R() * 1.5);
+      for (var b = 0; b < nb; b++) {
+        bubble(t + R() * dur, lerp(1400, 520, p) * (0.8 + R() * 0.4), lerp(500, 90, p), lerp(0.12, 0.38, p) * (0.6 + R() * 0.4));
+      }
+      t += dur + gap;
+    }
+
+    // finale : un dernier « pfff » mouillé qui s'éteint
+    amp.gain.setTargetAtTime(0, t, 0.03);
+    wet.gain.setTargetAtTime(0.4, t, 0.01);
+    wet.gain.setTargetAtTime(0, t + 0.12, 0.06);
+    for (var e = 0; e < 4; e++) bubble(t + 0.02 + R() * 0.18, 380 + R() * 200, 80, 0.25 + R() * 0.15);
+
+    var end = t + 0.5;
+    [saw, sq, flutter, noise].forEach(function (n) { n.start(t0); n.stop(end); });
+    return end - t0;
   }
 
   /* ---------------- Ouverture : le message du Père Noël ---------------- */
@@ -692,12 +754,12 @@
         el.classList.add('is-farting');
         var o = $('.butt__origin', el).getBoundingClientRect();
         var x = o.left + o.width / 2, y = o.top + o.height / 2;
-        [[0, 90], [120, 70], [260, 50], [420, 30]].forEach(function (w) {
+        [[0, 80], [150, 60], [320, 45], [520, 35], [760, 30], [1000, 25]].forEach(function (w) {
           setTimeout(function () { Snow.burst(x, y, w[1]); }, w[0]);
         });
       }, 380);
-      setTimeout(function () { el.classList.add('is-leaving'); snowcap(); }, 2200);
-      setTimeout(end, 3200);
+      setTimeout(function () { el.classList.add('is-leaving'); snowcap(); }, 2700);
+      setTimeout(end, 3700);
     }
     function skip() {
       clearTimeout(timer);
