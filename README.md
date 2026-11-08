@@ -16,7 +16,8 @@ Test en local : `python3 -m http.server` puis http://localhost:8000
 
 À chaque ouverture de la gazette, une carte de vœux pop-up s'ouvre : le Père Noël se dresse entre une lutine et une Mère Noël en pin-up (seins nus, tétons cachés par des têtes de lutin), nous regarde d'un air malicieux, se retourne, baisse son pantalon et lâche un pet : le son est synthétisé dans le navigateur (aucun fichier audio), et la neige qui en sort continue ensuite de tomber sur la gazette, en se déposant sur le haut de la page.
 
-- Toucher la carte (ou appuyer sur Entrée) l'ouvre et débloque le son ; le pet suit 2 s plus tard. Sans interaction, la carte s'ouvre seule au bout de 6 s, mais sans le son, que les navigateurs bloquent tant qu'on n'a pas touché la page.
+- Tout s'enchaîne seul, sans action : ouverture de la carte, Père Noël de face, demi-tour, pet (environ 5 s), puis la gazette.
+- Les navigateurs bloquent le son tant qu'on n'a pas touché la page : un toucher n'importe où (ou une touche du clavier) l'active, sans changer le rythme. Un message l'indique tant que le son est coupé.
 - « Passer » ou Échap pour sauter l'animation ; « Réécouter le message du Père Noël » en bas de page pour la rejouer.
 - Pas d'ouverture sur les liens de révélation. Elle est jouée même si le téléphone a les animations réduites.
 

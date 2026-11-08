@@ -611,7 +611,7 @@ html.intro-open { overflow: hidden; }
 }
 .intro__skip:hover { opacity: 1; }
 .intro__kicker, .intro__title, .intro__hint, .intro__skip { transition: opacity .4s ease; }
-.intro.is-opened .intro__hint { opacity: 0; animation: none; }
+.intro.is-sound-on .intro__hint { opacity: 0; animation: none; }
 
 .intro__stage {
   position: relative;

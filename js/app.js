@@ -848,15 +848,22 @@
     var el, card, santa, openTimer, turnTimer, fartTimer, opened = false, turned = false, fired = false, audio = null;
 
     function snowcap() { document.body.classList.add('has-snowcap'); }
-    // Le son doit être débloqué pendant un geste de l'utilisateur (toucher, clic, touche).
+    // L'animation se déroule seule. Le son, lui, n'est autorisé par les navigateurs qu'après
+    // un geste de l'utilisateur : un toucher n'importe où l'active, sans changer le rythme.
     function ensureAudio() {
       try {
         var AC = window.AudioContext || window.webkitAudioContext;
         if (!AC) return;
         audio = audio || new AC();
-        if (audio.state === 'suspended') audio.resume();
+        if (audio.state === 'suspended') {
+          var p = audio.resume();
+          if (p && p.then) p.then(syncHint, function () {});
+        }
       } catch (e) { audio = null; }
+      syncHint();
     }
+    function soundOn() { return !!audio && audio.state === 'running'; }
+    function syncHint() { if (el) el.classList.toggle('is-sound-on', soundOn()); }
 
     function show() {
       opened = turned = fired = false;
@@ -867,7 +874,8 @@
       el.hidden = false;
       document.documentElement.classList.add('intro-open');
       window.scrollTo(0, 0);
-      openTimer = setTimeout(open, 6000); // sans interaction, la carte s'ouvre seule (le son peut alors être bloqué)
+      ensureAudio(); // déjà autorisé si le visiteur a touché la page auparavant
+      openTimer = setTimeout(open, 900);
     }
     function end() {
       el.hidden = true;
@@ -880,7 +888,6 @@
       if (opened) return;
       opened = true;
       clearTimeout(openTimer);
-      ensureAudio();
       card.classList.add('is-open');
       el.classList.add('is-opened');
       turnTimer = setTimeout(turn, 2600); // le Père Noël nous regarde d'abord, l'air malicieux
@@ -897,8 +904,7 @@
       if (!turned) { turn(); return; }
       fired = true;
       clearTimeout(fartTimer);
-      ensureAudio();
-      try { if (audio) fartSound(audio, audio.currentTime + 0.38); } catch (e) { /* pas de son, tant pis */ }
+      try { if (soundOn()) fartSound(audio, audio.currentTime + 0.38); } catch (e) { /* pas de son, tant pis */ }
 
       el.classList.add('is-tension');
       setTimeout(function () {
@@ -920,7 +926,6 @@
       Snow.ambient();
       snowcap();
     }
-    function act() { if (!opened) open(); else if (!turned) turn(); else fart(); }
 
     return {
       init: function () {
@@ -929,12 +934,12 @@
         santa = $('[data-santa]', el);
         $$('[data-pinup]', el).forEach(function (n) { n.innerHTML = pinupSVG(n.getAttribute('data-pinup')); });
         el.addEventListener('click', function (e) {
-          if (e.target.closest('.intro__skip')) skip(); else act();
+          if (e.target.closest('.intro__skip')) skip(); else ensureAudio();
         });
+        el.addEventListener('touchend', ensureAudio, { passive: true });
         document.addEventListener('keydown', function (e) {
-          if (el.hidden || fired) return;
-          if (e.key === 'Escape') skip();
-          else if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button')) { e.preventDefault(); act(); }
+          if (el.hidden) return;
+          if (e.key === 'Escape') skip(); else ensureAudio();
         });
       },
       // À chaque ouverture de la gazette, y compris si le téléphone a les animations réduites.
