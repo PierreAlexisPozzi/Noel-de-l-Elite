@@ -714,39 +714,166 @@
     return end - t0;
   }
 
-  /* ---------------- Ouverture : le message du Père Noël ---------------- */
+  /* ---------------- Pin-ups de la carte (SVG dessinés à la main) ----------------
+     Même silhouette pour les deux : la Mère Noël est la version miroir, autrement habillée. */
+  function pinupSVG(kind) {
+    var elf = kind === 'elf';
+    var id = 'pin-' + kind;
+    var ink = '#3a2318', skin = '#f5c8a8', skinS = '#e2a585', gold = '#d9a73a';
+    var dress = elf ? '#2f7040' : '#b01f26';
+    var dressS = elf ? '#225532' : '#861419';
+    var trim = elf ? '#b3242a' : '#fbf6ec';
+    var hair = elf ? '#a9441c' : '#f3e3b3';
+    var hairS = elf ? '#7a2c10' : '#cdb57d';
+    var S = ' stroke="' + ink + '" stroke-width="2" stroke-linejoin="round"';
+    function line(d, color, w) { return '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
+    function limb(d, w, color) { return line(d, ink, w + 3) + line(d, color, w); }
+
+    var defs = elf
+      ? '<pattern id="' + id + '-stripes" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(-10)">' +
+        '<rect width="12" height="12" fill="#fbf6ec"/><rect width="12" height="6" fill="#b3242a"/></pattern>'
+      : '';
+    var legFill = elf ? 'url(#' + id + '-stripes)' : skin;
+
+    var g = '';
+    // jambes : une droite, l'autre croisée devant
+    g += '<path d="M80 256 C77 300 82 344 86 390 L97 390 C99 344 104 300 106 256 Z" fill="' + legFill + '"' + S + '/>';
+    g += '<path d="M108 256 L134 256 C136 292 120 314 110 328 C114 352 119 372 121 390 L110 391 C104 370 97 348 97 328 C100 300 104 280 108 256 Z" fill="' + legFill + '"' + S + '/>';
+    if (elf) {
+      // chaussures de lutin à bout recourbé, avec grelots
+      g += '<path d="M83 386 L99 386 C104 393 112 395 119 386 C122 396 113 404 98 404 C87 404 81 399 83 386 Z" fill="' + dress + '"' + S + '/>';
+      g += '<path d="M108 387 L122 387 C127 394 135 396 142 387 C145 397 136 405 121 405 C110 405 105 400 108 387 Z" fill="' + dress + '"' + S + '/>';
+      g += '<circle cx="120" cy="385" r="3.5" fill="' + gold + '"' + S + '/><circle cx="143" cy="386" r="3.5" fill="' + gold + '"' + S + '/>';
+    } else {
+      // bottes noires à revers de fourrure
+      g += '<path d="M83 332 L101 332 C100 352 98 372 98 390 L104 398 Q92 404 80 400 L84 390 C84 370 83 352 83 332 Z" fill="#1d1a17"' + S + '/>';
+      g += '<path d="M98 334 L114 330 C116 352 120 372 122 390 L130 399 Q117 405 108 400 L108 390 C104 370 99 352 98 334 Z" fill="#1d1a17"' + S + '/>';
+      g += '<rect x="79" y="324" width="26" height="11" rx="5" fill="' + trim + '"' + S + '/>';
+      g += '<rect x="94" y="322" width="24" height="11" rx="5" fill="' + trim + '"' + S + ' transform="rotate(-8 106 327)"/>';
+    }
+    // jupe
+    if (elf) {
+      g += '<path d="M86 182 L122 182 C138 200 154 228 160 258 L150 268 L140 256 L129 270 L118 258 L106 272 L94 258 L82 270 L70 256 L58 268 L48 258 C56 228 70 200 86 182 Z" fill="' + dress + '"' + S + '/>';
+      g += '<circle cx="150" cy="268" r="3.5" fill="' + gold + '"' + S + '/><circle cx="106" cy="272" r="3.5" fill="' + gold + '"' + S + '/><circle cx="58" cy="268" r="3.5" fill="' + gold + '"' + S + '/>';
+    } else {
+      g += '<path d="M86 182 L122 182 C140 202 156 232 160 258 Q104 274 48 258 C54 232 68 202 86 182 Z" fill="' + dress + '"' + S + '/>';
+      g += limb('M48 258 Q104 274 160 258', 11, trim);
+    }
+    g += line('M104 192 L103 258', dressS, 2) + line('M93 196 Q80 228 72 254', dressS, 2) + line('M116 196 Q128 228 138 254', dressS, 2);
+    // buste
+    g += '<path d="M72 128 C72 120 136 120 136 128 C138 150 126 162 122 184 L86 184 C82 162 70 150 72 128 Z" fill="' + dress + '"' + S + '/>';
+    g += '<path d="M80 125 Q104 119 128 125 Q123 138 113 137 Q104 131 95 137 Q85 138 80 125 Z" fill="' + skin + '"' + S + '/>';
+    g += limb('M80 126 Q86 140 96 137 Q104 132 112 137 Q122 140 128 126', 4, trim);
+    // ceinture
+    g += '<rect x="84" y="174" width="40" height="10" fill="#1d1a17"' + S + '/>';
+    g += '<rect x="97" y="172" width="14" height="14" rx="2" fill="none" stroke="' + gold + '" stroke-width="3"/>';
+    // bras sur la hanche
+    g += limb('M74 132 Q50 150 54 170 Q64 182 84 181', 9, skin);
+    g += limb('M74 132 Q61 141 57 152', 13, dress);
+    if (!elf) g += '<circle cx="57" cy="153" r="7" fill="' + trim + '"' + S + '/>';
+    g += '<ellipse cx="85" cy="181" rx="6" ry="5" fill="' + skin + '"' + S + '/>';
+    // bras levé, avec un accessoire
+    g += limb('M134 132 Q166 114 161 92 Q157 68 150 50', 9, skin);
+    g += limb('M134 132 Q150 124 158 112', 13, dress);
+    if (!elf) g += '<circle cx="158" cy="112" r="7" fill="' + trim + '"' + S + '/>';
+    if (elf) {
+      // sucre d'orge
+      g += line('M150 74 L150 24 Q150 10 162 10 Q174 10 174 22', ink, 10);
+      g += line('M150 74 L150 24 Q150 10 162 10 Q174 10 174 22', '#fbf6ec', 7);
+      g += '<path d="M150 74 L150 24 Q150 10 162 10 Q174 10 174 22" fill="none" stroke="#b3242a" stroke-width="7" stroke-dasharray="4 5" stroke-linecap="butt"/>';
+    } else {
+      // brin de gui
+      g += line('M150 46 L150 18', '#4a6b2e', 2.5);
+      g += '<ellipse cx="142" cy="22" rx="10" ry="4.5" fill="#5f8a3a" transform="rotate(-35 142 22)"' + S + '/>';
+      g += '<ellipse cx="158" cy="22" rx="10" ry="4.5" fill="#5f8a3a" transform="rotate(35 158 22)"' + S + '/>';
+      g += '<ellipse cx="143" cy="33" rx="9" ry="4" fill="#4f7a30" transform="rotate(-20 143 33)"' + S + '/>';
+      g += '<ellipse cx="157" cy="33" rx="9" ry="4" fill="#4f7a30" transform="rotate(20 157 33)"' + S + '/>';
+      g += '<circle cx="150" cy="26" r="3.2" fill="#fbf6ec"' + S + '/><circle cx="146" cy="30" r="3" fill="#fbf6ec"' + S + '/><circle cx="154" cy="30" r="3" fill="#fbf6ec"' + S + '/>';
+    }
+    g += '<ellipse cx="150" cy="49" rx="6.5" ry="6" fill="' + skin + '"' + S + '/>';
+    // cou, cheveux, visage
+    g += '<path d="M97 100 L111 100 L112 122 Q104 126 96 122 Z" fill="' + skin + '"' + S + '/>';
+    g += '<path d="M74 80 C70 46 90 36 106 36 C126 36 140 50 136 82 C140 100 134 112 126 114 C120 104 88 104 80 114 C70 110 70 96 74 80 Z" fill="' + hair + '"' + S + '/>';
+    g += '<circle cx="80" cy="112" r="9" fill="' + hair + '"' + S + '/><circle cx="128" cy="112" r="9" fill="' + hair + '"' + S + '/>';
+    if (elf) {
+      g += '<path d="M86 80 L68 62 L82 92 Z" fill="' + skin + '"' + S + '/><path d="M122 80 L140 62 L126 92 Z" fill="' + skin + '"' + S + '/>';
+    }
+    g += '<path d="M84 76 C84 58 124 58 124 76 C124 94 114 104 104 104 C94 104 84 94 84 76 Z" fill="' + skin + '"' + S + '/>';
+    // boucles « victory rolls » et frange
+    g += '<circle cx="90" cy="56" r="11" fill="' + hair + '"' + S + '/><circle cx="118" cy="54" r="11" fill="' + hair + '"' + S + '/>';
+    g += line('M84 57 Q90 49 96 57', hairS, 2) + line('M112 55 Q118 47 124 55', hairS, 2);
+    g += '<path d="M85 66 Q100 58 112 63 Q120 59 125 67 Q112 65 104 71 Q94 67 85 66 Z" fill="' + hair + '"' + S + '/>';
+    // visage : clin d'œil, cils, bouche rouge, grain de beauté
+    g += line('M90 71 Q95 68 100 71', ink, 1.8) + line('M108 70 Q113 67 118 70', ink, 1.8);
+    g += line('M90 79 Q95 83 100 79', ink, 2.2) + line('M90 79 L87 77', ink, 1.6) + line('M92 81 L90 84', ink, 1.6);
+    g += '<ellipse cx="113" cy="79" rx="3" ry="3.8" fill="' + ink + '"/><circle cx="114" cy="77.8" r="1" fill="#fff"/>';
+    g += line('M110 75 L109 72 M113 74.5 L113 71 M116 75 L117.5 72', ink, 1.4);
+    g += line('M104 83 Q102 89 105 90', skinS, 1.6);
+    g += '<circle cx="93" cy="89" r="4.5" fill="#ec8f86" opacity=".45"/><circle cx="117" cy="89" r="4.5" fill="#ec8f86" opacity=".45"/>';
+    g += '<path d="M98 95 Q101 92 104 94 Q107 92 110 95 Q104 101 98 95 Z" fill="#c4262d" stroke="#8d1a1f" stroke-width="1"/>';
+    g += '<circle cx="114.5" cy="93" r=".9" fill="' + ink + '"/>';
+    // chapeau
+    if (elf) {
+      g += '<path d="M80 60 Q96 18 142 6 Q160 2 166 14 Q150 10 138 22 Q124 40 130 58 Z" fill="' + dress + '"' + S + '/>';
+      g += limb('M77 62 Q104 50 133 58', 9, trim);
+      g += '<circle cx="167" cy="17" r="6" fill="' + gold + '"' + S + '/>';
+    } else {
+      g += '<path d="M80 62 Q92 22 128 18 Q156 16 168 40 Q150 32 136 40 Q128 50 130 60 Z" fill="' + dress + '"' + S + '/>';
+      g += limb('M77 63 Q104 50 134 58', 11, trim);
+      g += '<circle cx="169" cy="44" r="9" fill="' + trim + '"' + S + '/>';
+    }
+
+    var body = elf ? g : '<g transform="translate(200 0) scale(-1 1)">' + g + '</g>';
+    var vb = elf ? '36 -6 148 418' : '16 -6 148 418';
+    return '<svg viewBox="' + vb + '"><defs>' + defs + '</defs><g filter="url(#diecut)">' + body + '</g></svg>';
+  }
+
+  /* ---------------- Ouverture : la carte pop-up du Père Noël ---------------- */
   var Intro = (function () {
-    var el, timer, fired = false, audio = null;
+    var el, card, hint, openTimer, fartTimer, opened = false, fired = false, audio = null;
 
     function snowcap() { document.body.classList.add('has-snowcap'); }
+    // Le son doit être débloqué pendant un geste de l'utilisateur (toucher, clic, touche).
+    function ensureAudio() {
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        audio = audio || new AC();
+        if (audio.state === 'suspended') audio.resume();
+      } catch (e) { audio = null; }
+    }
 
     function show() {
-      el = $('#intro');
-      fired = false;
+      opened = fired = false;
+      clearTimeout(openTimer); clearTimeout(fartTimer);
       el.className = 'intro';
+      card.classList.remove('is-open');
       el.hidden = false;
       document.documentElement.classList.add('intro-open');
       window.scrollTo(0, 0);
-      clearTimeout(timer);
-      timer = setTimeout(fart, 5000); // sans interaction : le pet part tout seul (sans le son si le navigateur le bloque)
+      openTimer = setTimeout(open, 6000); // sans interaction, la carte s'ouvre seule (le son peut alors être bloqué)
     }
     function end() {
       el.hidden = true;
       el.className = 'intro';
+      card.classList.remove('is-open');
       document.documentElement.classList.remove('intro-open');
+    }
+    function open() {
+      if (opened) return;
+      opened = true;
+      clearTimeout(openTimer);
+      ensureAudio();
+      card.classList.add('is-open');
+      el.classList.add('is-opened');
+      fartTimer = setTimeout(fart, 2300);
     }
     function fart() {
       if (fired) return;
       fired = true;
-      clearTimeout(timer);
-      try {
-        var AC = window.AudioContext || window.webkitAudioContext;
-        if (AC) {
-          audio = audio || new AC();
-          if (audio.state === 'suspended') audio.resume();
-          fartSound(audio, audio.currentTime + 0.38);
-        }
-      } catch (e) { /* pas de son, tant pis */ }
+      clearTimeout(fartTimer);
+      ensureAudio();
+      try { if (audio) fartSound(audio, audio.currentTime + 0.38); } catch (e) { /* pas de son, tant pis */ }
 
       el.classList.add('is-tension');
       setTimeout(function () {
@@ -758,27 +885,30 @@
           setTimeout(function () { Snow.burst(x, y, w[1]); }, w[0]);
         });
       }, 380);
-      setTimeout(function () { el.classList.add('is-leaving'); snowcap(); }, 2700);
-      setTimeout(end, 3700);
+      setTimeout(function () { el.classList.add('is-leaving'); snowcap(); }, 2900);
+      setTimeout(end, 3900);
     }
     function skip() {
-      clearTimeout(timer);
-      fired = true;
+      clearTimeout(openTimer); clearTimeout(fartTimer);
+      opened = fired = true;
       end();
       Snow.ambient();
       snowcap();
     }
+    function act() { if (!opened) open(); else fart(); }
 
     return {
       init: function () {
         el = $('#intro');
+        card = $('[data-pcard]', el);
+        $$('[data-pinup]', el).forEach(function (n) { n.innerHTML = pinupSVG(n.getAttribute('data-pinup')); });
         el.addEventListener('click', function (e) {
-          if (e.target.closest('.intro__skip')) skip(); else fart();
+          if (e.target.closest('.intro__skip')) skip(); else act();
         });
         document.addEventListener('keydown', function (e) {
           if (el.hidden || fired) return;
           if (e.key === 'Escape') skip();
-          else if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button')) { e.preventDefault(); fart(); }
+          else if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button')) { e.preventDefault(); act(); }
         });
       },
       // À chaque ouverture de la gazette, y compris si le téléphone a les animations réduites.

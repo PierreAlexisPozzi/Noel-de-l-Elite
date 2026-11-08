@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=4">
+  <link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
   <!-- Ornement réutilisable : branche de houx -->
@@ -25,59 +25,103 @@
           <circle cx="-4" cy="4" r="5"/><circle cx="5" cy="5" r="5"/><circle cx="0" cy="-3" r="5"/>
         </g>
       </symbol>
+      <filter id="diecut" x="-10%" y="-10%" width="120%" height="120%">
+        <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="grown"/>
+        <feFlood flood-color="#fffaf0"/>
+        <feComposite in2="grown" operator="in" result="outline"/>
+        <feMerge><feMergeNode in="outline"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
     </defs>
   </svg>
 
   <canvas id="snow" aria-hidden="true"></canvas>
 
-  <!-- ===================== OUVERTURE : le message du Père Noël ===================== -->
+  <!-- ===================== OUVERTURE : carte pop-up du Père Noël ===================== -->
   <div class="intro" id="intro" hidden>
     <div class="intro__bg" aria-hidden="true"></div>
     <p class="intro__kicker">Le Noël de l'Élite · Édition <span data-edition></span></p>
     <p class="intro__title">Le Père Noël a un message pour vous</p>
 
-    <button type="button" class="intro__stage" aria-label="Écouter le message du Père Noël">
-      <span class="intro__bang" aria-hidden="true"><span>Prout&#8239;!</span></span>
-      <svg class="butt" viewBox="0 0 300 270" aria-hidden="true">
-        <defs>
-          <radialGradient id="cheek-l" cx="36%" cy="34%" r="72%">
-            <stop offset="0" stop-color="#ffe3d1"/><stop offset=".55" stop-color="#f3bd9e"/><stop offset="1" stop-color="#d48d72"/>
-          </radialGradient>
-          <radialGradient id="cheek-r" cx="64%" cy="34%" r="72%">
-            <stop offset="0" stop-color="#ffe3d1"/><stop offset=".55" stop-color="#f3bd9e"/><stop offset="1" stop-color="#d48d72"/>
-          </radialGradient>
-        </defs>
-        <g class="butt__cheeks">
-          <g class="butt__cheek butt__cheek--l">
-            <circle cx="104" cy="150" r="78" fill="url(#cheek-l)"/>
-            <ellipse cx="78" cy="116" rx="22" ry="12" fill="#fff" opacity=".5" transform="rotate(-28 78 116)"/>
-            <ellipse cx="92" cy="176" rx="22" ry="12" fill="#e2807a" opacity=".3"/>
-          </g>
-          <g class="butt__cheek butt__cheek--r">
-            <circle cx="196" cy="150" r="78" fill="url(#cheek-r)"/>
-            <ellipse cx="222" cy="116" rx="22" ry="12" fill="#fff" opacity=".5" transform="rotate(28 222 116)"/>
-            <ellipse cx="208" cy="176" rx="22" ry="12" fill="#e2807a" opacity=".3"/>
-          </g>
-          <path d="M150 84 C145 122 147 166 150 214" stroke="#8a4a38" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-          <circle class="butt__origin" cx="150" cy="198" r="1" fill="none"/>
-        </g>
-        <!-- veste du Père Noël -->
-        <g>
-          <path d="M34 0 H266 Q294 26 292 62 Q150 86 8 62 Q6 26 34 0 Z" fill="#a01c22"/>
-          <path d="M8 62 Q150 86 292 62" stroke="#f6f1e6" stroke-width="22" stroke-linecap="round" fill="none"/>
-          <path d="M8 62 Q150 86 292 62" stroke="#ddd3c2" stroke-width="18" stroke-linecap="round" stroke-dasharray="1 11" fill="none"/>
-        </g>
-        <!-- pantalon baissé -->
-        <g>
-          <path d="M2 224 Q150 206 298 224 Q300 254 272 270 H28 Q0 254 2 224 Z" fill="#8f171d"/>
-          <path d="M2 224 Q150 206 298 224" stroke="#f6f1e6" stroke-width="24" stroke-linecap="round" fill="none"/>
-          <path d="M2 224 Q150 206 298 224" stroke="#ddd3c2" stroke-width="20" stroke-linecap="round" stroke-dasharray="1 12" fill="none"/>
-        </g>
-      </svg>
-      <span class="intro__puff" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
-    </button>
+    <div class="intro__stage" role="button" tabindex="0" aria-label="Ouvrir la carte du Père Noël">
+      <div class="pcard" data-pcard>
+        <!-- fond de la carte -->
+        <div class="pcard__wall" aria-hidden="true">
+          <span class="pcard__banner">Joyeux Noël</span>
+        </div>
 
-    <p class="intro__hint">Touchez l'écran pour l'écouter · montez le son</p>
+        <!-- découpes qui se dressent -->
+        <div class="pop pop--elf" data-pinup="elf" aria-hidden="true"></div>
+        <div class="pop pop--claus" data-pinup="claus" aria-hidden="true"></div>
+        <div class="pop pop--butt" aria-hidden="true">
+          <span class="intro__bang"><span>Prout&#8239;!</span></span>
+          <svg class="butt" viewBox="-10 -10 320 290">
+            <defs>
+              <radialGradient id="cheek-l" cx="38%" cy="32%" r="75%">
+                <stop offset="0" stop-color="#ffe6d6"/><stop offset=".5" stop-color="#f5c3a5"/><stop offset="1" stop-color="#d98f73"/>
+              </radialGradient>
+              <radialGradient id="cheek-r" cx="62%" cy="32%" r="75%">
+                <stop offset="0" stop-color="#ffe6d6"/><stop offset=".5" stop-color="#f5c3a5"/><stop offset="1" stop-color="#d98f73"/>
+              </radialGradient>
+            </defs>
+            <g filter="url(#diecut)">
+              <g class="butt__cheeks" stroke="#3a2318" stroke-width="2.5" stroke-linejoin="round">
+                <g class="butt__cheek butt__cheek--l">
+                  <path d="M150 84 C118 70 62 78 42 128 C26 172 50 222 102 228 C130 231 147 216 150 198 Z" fill="url(#cheek-l)"/>
+                  <ellipse cx="80" cy="114" rx="22" ry="11" fill="#fff" opacity=".55" stroke="none" transform="rotate(-30 80 114)"/>
+                  <ellipse cx="92" cy="182" rx="22" ry="11" fill="#ea7f78" opacity=".3" stroke="none"/>
+                  <path d="M70 212 Q100 226 132 218" fill="none" stroke="#c98468" stroke-width="2.5" opacity=".7"/>
+                  <use href="#holly" x="62" y="134" width="44" height="26" class="butt__tattoo" stroke="none" transform="rotate(-14 84 147)"/>
+                </g>
+                <g class="butt__cheek butt__cheek--r">
+                  <path d="M150 84 C182 70 238 78 258 128 C274 172 250 222 198 228 C170 231 153 216 150 198 Z" fill="url(#cheek-r)"/>
+                  <ellipse cx="220" cy="114" rx="22" ry="11" fill="#fff" opacity=".55" stroke="none" transform="rotate(30 220 114)"/>
+                  <ellipse cx="208" cy="182" rx="22" ry="11" fill="#ea7f78" opacity=".3" stroke="none"/>
+                  <path d="M168 218 Q200 226 230 212" fill="none" stroke="#c98468" stroke-width="2.5" opacity=".7"/>
+                </g>
+                <path d="M150 86 C146 124 147 166 150 212" fill="none" stroke-width="3" stroke-linecap="round"/>
+                <circle class="butt__origin" cx="150" cy="198" r="1" fill="none" stroke="none"/>
+              </g>
+              <!-- veste, ceinture et fourrure -->
+              <g stroke="#3a2318" stroke-width="2.5" stroke-linejoin="round">
+                <path d="M30 0 H270 Q296 30 294 66 Q150 92 6 66 Q4 30 30 0 Z" fill="#b01f26"/>
+                <path d="M16 24 Q150 40 284 24 L286 44 Q150 60 14 44 Z" fill="#1d1a17"/>
+                <rect x="128" y="26" width="44" height="30" rx="4" fill="none" stroke="#d9a73a" stroke-width="5"/>
+                <rect x="128" y="26" width="44" height="30" rx="4" fill="none" stroke="#3a2318" stroke-width="1"/>
+                <path d="M150 34 V48" stroke="#d9a73a" stroke-width="4" stroke-linecap="round"/>
+                <path d="M6 66 Q150 92 294 66" fill="none" stroke-width="26" stroke-linecap="round"/>
+                <path d="M6 66 Q150 92 294 66" fill="none" stroke="#fbf6ec" stroke-width="21" stroke-linecap="round"/>
+                <path d="M6 66 Q150 92 294 66" fill="none" stroke="#e2d8c6" stroke-width="16" stroke-linecap="round" stroke-dasharray="1 10"/>
+              </g>
+              <!-- pantalon baissé -->
+              <g stroke="#3a2318" stroke-width="2.5" stroke-linejoin="round">
+                <path d="M2 222 Q150 204 298 222 Q300 254 272 270 H28 Q0 254 2 222 Z" fill="#8f171d"/>
+                <path d="M150 224 V270" stroke="#6d1015" stroke-width="2"/>
+                <path d="M2 222 Q150 204 298 222" fill="none" stroke-width="25" stroke-linecap="round"/>
+                <path d="M2 222 Q150 204 298 222" fill="none" stroke="#fbf6ec" stroke-width="20" stroke-linecap="round"/>
+                <path d="M2 222 Q150 204 298 222" fill="none" stroke="#e2d8c6" stroke-width="15" stroke-linecap="round" stroke-dasharray="1 11"/>
+              </g>
+            </g>
+          </svg>
+          <span class="intro__puff"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        </div>
+
+        <!-- couverture : se rabat pour devenir le sol de la carte -->
+        <div class="pcard__cover">
+          <div class="pcard__face pcard__face--out">
+            <span class="pcard__over">Carte de vœux · Édition <span data-edition></span></span>
+            <span class="pcard__name">Le Noël <i>de</i> l'Élite</span>
+            <span class="pcard__seal" aria-hidden="true">É</span>
+            <span class="pcard__open">Ouvrir la carte</span>
+          </div>
+          <div class="pcard__face pcard__face--in" aria-hidden="true">
+            <span class="pcard__note">Meilleurs vœux… et meilleurs vents&#8239;!</span>
+            <span class="pcard__sign">— le Père Noël</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="intro__hint" data-intro-hint>Touchez la carte pour l'ouvrir · montez le son</p>
     <button type="button" class="intro__skip">Passer</button>
   </div>
 
@@ -237,7 +281,7 @@
 
   <div class="toast" role="status" aria-live="polite" data-toast></div>
 
-  <script src="js/config.js?v=4"></script>
-  <script src="js/app.js?v=4"></script>
+  <script src="js/config.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>
