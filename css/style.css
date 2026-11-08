@@ -730,8 +730,8 @@ html.intro-open { overflow: hidden; }
 .santa__belly, .santa__brow--up, .santa__eyes { transform-box: fill-box; }
 .santa__belly { transform-origin: 50% 100%; }
 .santa__mouth { transform-box: fill-box; transform-origin: 50% 0; }
-.santa.is-laughing .santa__belly { animation: belly .43s ease-in-out 3; }
-.santa.is-laughing .santa__mouth { animation: laugh .43s ease-in-out 3; }
+.santa.is-laughing .santa__belly { animation: belly .43s ease-in-out infinite; }
+.santa.is-laughing .santa__mouth { animation: laugh .43s ease-in-out infinite; }
 @keyframes laugh { 50% { transform: scaleY(2.4); } }
 
 /* ---- Les pin-ups jettent leur haut ---- */

@@ -928,29 +928,28 @@
     }
     function soundOn() { return !!audio && audio.state === 'running'; }
 
-    // Le pet : extrait audio (5 s), chargé dès l'ouverture. Repli sur le pet synthétisé si besoin.
-    var CLIP_URL = 'audio/prout-de-noel.mp3?v=12', clip = null, clipLoading = false;
-    function loadClip() {
-      if (clip || clipLoading || !audio || !window.fetch) return;
-      clipLoading = true;
-      fetch(CLIP_URL)
-        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
-        .then(function (ab) {
-          // forme à callbacks : compatible avec les anciens Safari
-          audio.decodeAudioData(ab, function (buf) { clip = buf; }, function () { clipLoading = false; });
-        })
-        .catch(function () { clipLoading = false; });
+    // Sons enregistrés, chargés dès l'ouverture. Repli sur les sons synthétisés si besoin.
+    var SOUNDS = { hoho: 'audio/oh-oh-oh.mp3?v=16', fart: 'audio/prout-de-noel.mp3?v=12' };
+    var buffers = {}, loading = {};
+    function loadSounds() {
+      if (!audio || !window.fetch) return;
+      Object.keys(SOUNDS).forEach(function (k) {
+        if (buffers[k] || loading[k]) return;
+        loading[k] = true;
+        fetch(SOUNDS[k])
+          .then(function (r) { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+          .then(function (ab) {
+            // forme à callbacks : compatible avec les anciens Safari
+            audio.decodeAudioData(ab, function (buf) { buffers[k] = buf; }, function () { loading[k] = false; });
+          })
+          .catch(function () { loading[k] = false; });
+      });
     }
-    function playFart(when) {
-      if (clip) {
-        var src = audio.createBufferSource(), g = audio.createGain();
-        src.buffer = clip; g.gain.value = 1;
-        src.connect(g); g.connect(audio.destination);
-        src.start(when);
-      } else {
-        fartSound(audio, when);
-      }
+    function playBuffer(buf, when) {
+      var src = audio.createBufferSource();
+      src.buffer = buf; src.connect(audio.destination); src.start(when);
     }
+    function playFart(when) { if (buffers.fart) playBuffer(buffers.fart, when); else fartSound(audio, when); }
     function syncHint() { if (el) el.classList.toggle('is-sound-on', soundOn()); }
 
     function show() {
@@ -963,7 +962,7 @@
       document.documentElement.classList.add('intro-open');
       window.scrollTo(0, 0);
       ensureAudio(); // déjà autorisé si le visiteur a touché la page auparavant
-      loadClip();
+      loadSounds();
       openTimer = setTimeout(open, 1500); // laisse le temps de toucher l'écran pour avoir le son
     }
     function end() {
@@ -983,10 +982,18 @@
     }
     function laugh() {
       santa.classList.add('is-laughing');
-      try { if (soundOn()) hohoho(audio, audio.currentTime + 0.02); } catch (e) { /* pas de son */ }
-      stripTimer = setTimeout(strip, 1450); // à la fin du « oh oh oh »
+      // le rire dure le temps de l'enregistrement (≈ 4 s), ou 1,45 s pour la voix synthétisée
+      var dur = buffers.hoho ? buffers.hoho.duration - 0.1 : 1.45;
+      try {
+        if (soundOn()) {
+          if (buffers.hoho) playBuffer(buffers.hoho, audio.currentTime + 0.02);
+          else hohoho(audio, audio.currentTime + 0.02);
+        }
+      } catch (e) { /* pas de son */ }
+      stripTimer = setTimeout(strip, Math.round(dur * 1000)); // à la fin du « oh oh oh »
     }
     function strip() {
+      santa.classList.remove('is-laughing');
       card.classList.add('is-stripped');
       turnTimer = setTimeout(turn, 750);
     }
