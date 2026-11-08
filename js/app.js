@@ -864,8 +864,8 @@
     }
     function soundOn() { return !!audio && audio.state === 'running'; }
 
-    // Le pet : extrait audio (3 s), chargé dès l'ouverture. Repli sur le pet synthétisé si besoin.
-    var CLIP_URL = 'audio/prout-de-noel.mp3?v=11', clip = null, clipLoading = false;
+    // Le pet : extrait audio (5 s), chargé dès l'ouverture. Repli sur le pet synthétisé si besoin.
+    var CLIP_URL = 'audio/prout-de-noel.mp3?v=12', clip = null, clipLoading = false;
     function loadClip() {
       if (clip || clipLoading || !audio || !window.fetch) return;
       clipLoading = true;
@@ -941,9 +941,9 @@
           setTimeout(function () { Snow.burst(x, y, w[1]); }, w[0]);
         });
       }, 380);
-      // l'extrait dure 3 s : la carte tombe pendant ses dernières notes
-      setTimeout(function () { el.classList.add('is-leaving'); snowcap(); }, 3300);
-      setTimeout(end, 4300);
+      // l'extrait dure 5 s : la carte tombe pendant ses dernières notes
+      setTimeout(function () { el.classList.add('is-leaving'); snowcap(); }, 5000);
+      setTimeout(end, 6000);
     }
     function skip() {
       clearTimeout(openTimer); clearTimeout(turnTimer); clearTimeout(fartTimer);
