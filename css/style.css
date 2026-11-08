@@ -364,6 +364,7 @@ html.intro-open { overflow: hidden; }
 /* ---------- Tirage ---------- */
 .draw-ready { text-align: center; max-width: 640px; margin: 0 auto; }
 .draw-ready p { margin: 0 0 22px; }
+.draw-status { font-family: var(--f-display); font-style: italic; font-size: 2rem; line-height: 1.1; margin-bottom: 10px !important; }
 .draw-ready .fine { margin-top: 22px; }
 
 .drum {

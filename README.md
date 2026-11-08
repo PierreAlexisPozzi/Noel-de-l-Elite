@@ -1,6 +1,6 @@
 # Le Noël de l'Élite
 
-Site de la soirée de Noël de l'Élite, façon gazette imprimée : modalités de la soirée, liste des convives et **tirage au sort du secret santa**.
+Site de la soirée de Noël de l'Élite, façon gazette imprimée. Il sert uniquement à **informer les participants** : modalités de la soirée, liste des convives, état du tirage, et la page « missive » que chacun ouvre avec son lien personnel. Le tirage lui-même se fait hors du site, avec `outils/tirage.mjs`.
 
 Site 100 % statique (HTML / CSS / JavaScript, aucune dépendance, aucun serveur).
 
@@ -27,19 +27,25 @@ Test en local : `python3 -m http.server` puis http://localhost:8000
 |---|---|
 | `evenement.date` | Date ISO (`"2026-12-20T19:30:00"`). `null` = compte à rebours vers le 25 décembre |
 | `evenement.lieu`, `budget`, `tenue` | Affichés dans « Les modalités » et dans chaque missive. Vide = « à définir » |
-| `participants` | Liste initiale des convives (facultatif : on peut aussi les saisir sur le site) |
-| `exclusions` | Paires qui ne doivent pas se tirer, ex. `[["Camille", "Thomas"]]` |
+| `participants` | Liste des convives, affichée sur le site (non modifiable depuis le site) |
+| `exclusions` | Paires qui ne doivent pas se tirer, ex. `[["Camille", "Thomas"]]` (non affichées sur le site, mais lisibles dans ce fichier public) |
 | `interdireEchangesCroises` | Empêche A → B **et** B → A |
 | `secret` | Clé de brouillage des liens. **À changer avant le tirage, plus jamais après** |
+| `tirage` | `{ effectue: true, date: "15 novembre" }` une fois les liens envoyés : la section « Le tirage au sort » l'annonce |
 
 Les infos de la soirée (date, lieu, budget) peuvent être modifiées **après** le tirage : les missives les relisent depuis la config.
 
 ## Déroulé du tirage
 
-1. **Convives** : saisir les noms (un ou plusieurs, séparés par des virgules) et les incompatibilités (couples).
-2. **Tirage** : bouton « Procéder au tirage ». Le résultat n'est affiché à personne ; l'organisateur obtient une enveloppe fermée par convive.
-3. **Envoi** : pour chaque enveloppe, « Copier le lien » ou « WhatsApp ». Chaque lien est personnel et marqué « Expédiée » une fois envoyé.
-4. **Révélation** : chacun ouvre son lien, brise le sceau de cire et découvre à qui il offre un cadeau.
+1. **Configurer** `js/config.js` : `participants`, `exclusions`, `interdireEchangesCroises`, `secret`.
+2. **Tirer au sort** (Node 18 ou plus récent) :
+   ```
+   node outils/tirage.mjs
+   ```
+   Le script affiche une ligne par convive, `Nom : lien`, **sans jamais afficher qui offre à qui**. Le résultat n'est enregistré nulle part : relancer le script refait un tirage complet (les anciens liens restent lisibles mais ne correspondent plus au nouveau tirage).
+3. **Envoyer** à chacun son lien, en message privé.
+4. Passer `tirage.effectue` à `true` dans la config et publier.
+5. **Révélation** : chacun ouvre son lien, brise le sceau de cire et découvre à qui il offre un cadeau.
 
 ### Règles garanties par l'algorithme
 
@@ -50,6 +56,5 @@ Les infos de la soirée (date, lieu, budget) peuvent être modifiées **après**
 
 ## À savoir
 
-- **Le tirage est stocké dans le navigateur de l'organisateur** (localStorage). Faire le tirage depuis l'appareil avec lequel on enverra les liens ; vider les données du site efface le tirage (les liens déjà envoyés restent valables).
 - **Confidentialité** : le nom du destinataire est brouillé dans le lien, après le `#`, qui n'est jamais transmis au serveur. C'est un brouillage, pas un chiffrement fort : un organisateur technique et déterminé pourrait décoder un lien. Pour un secret santa entre amis, c'est suffisant.
-- Annuler le tirage rend tous les liens déjà envoyés caducs : il faut tout renvoyer.
+- Ne pas modifier `secret` après l'envoi des liens : ils deviendraient illisibles.

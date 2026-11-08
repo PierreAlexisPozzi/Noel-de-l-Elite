@@ -49,11 +49,6 @@
     for (var i = a.length - 1; i > 0; i--) { var j = randInt(i + 1), t = a[i]; a[i] = a[j]; a[j] = t; }
     return a;
   }
-  function uid() {
-    var b = new Uint8Array(6); crypto.getRandomValues(b);
-    return Array.prototype.map.call(b, function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
-  }
-
   /* ---------------- Liens scellés ----------------
      Le destinataire est brouillé (XOR + nonce) dans le fragment #, qui
      n'est jamais envoyé au serveur. Ce n'est pas du chiffrement fort :
@@ -82,14 +77,6 @@
     var s = atob(str), out = new Uint8Array(s.length);
     for (var i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
     return out;
-  }
-  function sealToken(obj) {
-    var data = new TextEncoder().encode(JSON.stringify(obj));
-    var nonce = new Uint8Array(4); crypto.getRandomValues(nonce);
-    var ks = keystream(nonce, data.length), out = new Uint8Array(4 + data.length);
-    out.set(nonce, 0);
-    for (var i = 0; i < data.length; i++) out[4 + i] = data[i] ^ ks[i];
-    return b64e(out);
   }
   function openToken(tok) {
     try {
@@ -167,327 +154,53 @@
     tick();
   }
 
-  /* ---------------- État (localStorage) ---------------- */
+  /* ---------------- Convives (lecture seule : la liste vient de la configuration) ---------------- */
   function normName(s) { return String(s).trim().replace(/\s+/g, ' '); }
-  function keyName(s) { return normName(s).toLocaleLowerCase('fr'); }
-
-  function seedState() {
-    var people = [], seen = {};
+  function people() {
+    var seen = {}, out = [];
     (CFG.participants || []).forEach(function (n) {
-      var name = normName(n || '');
-      if (!name || seen[keyName(name)]) return;
-      seen[keyName(name)] = true;
-      people.push({ id: uid(), name: name });
+      var name = normName(n || ''), k = name.toLocaleLowerCase('fr');
+      if (name && !seen[k]) { seen[k] = true; out.push(name); }
     });
-    function idOf(n) {
-      var k = keyName(n || '');
-      for (var i = 0; i < people.length; i++) if (keyName(people[i].name) === k) return people[i].id;
-      return null;
-    }
-    var ex = [];
-    (CFG.exclusions || []).forEach(function (pair) {
-      if (!pair || pair.length !== 2) return;
-      var a = idOf(pair[0]), b = idOf(pair[1]);
-      if (a && b && a !== b) ex.push([a, b]);
-    });
-    return { people: people, exclusions: ex, noCross: CFG.interdireEchangesCroises !== false, draw: null };
+    return out;
   }
-  function loadState() {
-    try {
-      var raw = localStorage.getItem(STORE_KEY);
-      if (raw) {
-        var s = JSON.parse(raw);
-        // Une liste locale vide (sans tirage) ne masque pas celle de la configuration.
-        if (s && Array.isArray(s.people) && (s.people.length || s.draw)) return s;
-      }
-    } catch (e) { /* stockage indisponible */ }
-    return seedState();
-  }
-  function saveState() {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
-  }
-
-  var state;
-
-  /* ---------------- Chiffres romains ---------------- */
   function roman(n) {
     var map = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']], out = '';
     map.forEach(function (p) { while (n >= p[0]) { out += p[1]; n -= p[0]; } });
     return out;
   }
-  function personById(id) {
-    for (var i = 0; i < state.people.length; i++) if (state.people[i].id === id) return state.people[i];
-    return null;
-  }
-
-  /* ---------------- Convives ---------------- */
-  var justAdded = {};
   function renderRoll() {
-    var locked = !!state.draw;
-    var list = $('[data-roll]');
+    var list = $('[data-roll]'), names = people();
     list.replaceChildren();
-    var n = state.people.length;
-
-    $('[data-roll-count]').textContent = n === 0
-      ? ''
-      : n + (n > 1 ? ' convives inscrits' : ' convive inscrit') + (locked ? ' · liste close' : '');
-
-    if (n === 0) {
+    $('[data-roll-count]').textContent = names.length
+      ? names.length + (names.length > 1 ? ' convives inscrits' : ' convive inscrit')
+      : '';
+    if (!names.length) {
       list.hidden = true;
-      if (!$('.roll-empty')) list.parentNode.insertBefore(h('p', { class: 'roll-empty', text: 'Aucun convive inscrit pour l’heure. La liste reste à arrêter.' }), list);
-    } else {
-      list.hidden = false;
-      var empty = $('.roll-empty'); if (empty) empty.remove();
-      state.people.forEach(function (p, i) {
-        list.appendChild(h('li', { class: justAdded[p.id] ? 'is-new' : null },
-          h('span', { class: 'roll__num', text: roman(i + 1) + '.' }),
-          h('span', { class: 'roll__name', text: p.name }),
-          locked ? null : h('button', {
-            type: 'button', class: 'roll__del', text: 'rayer',
-            'aria-label': 'Rayer ' + p.name + ' de la liste',
-            onclick: function () { removePerson(p.id); }
-          })
-        ));
-      });
+      list.parentNode.insertBefore(h('p', { class: 'roll-empty', text: 'La liste des convives sera bientôt publiée.' }), list);
+      return;
     }
-    justAdded = {};
-
-    $('[data-roll-tools]').hidden = locked;
-    $('[data-locked-note]').hidden = !locked;
-    renderExclusions();
-  }
-
-  function addPeople(raw) {
-    var names = String(raw).split(/[,;\n]+/).map(normName).filter(Boolean);
-    if (!names.length) return;
-    var added = 0, dupes = [];
-    names.forEach(function (name) {
-      if (name.length > 40) name = name.slice(0, 40).trim();
-      var exists = state.people.some(function (p) { return keyName(p.name) === keyName(name); });
-      if (exists) { dupes.push(name); return; }
-      var p = { id: uid(), name: name };
-      state.people.push(p);
-      justAdded[p.id] = true;
-      added++;
-    });
-    saveState();
-    renderAll();
-    if (dupes.length) toast(dupes.join(', ') + (dupes.length > 1 ? ' figurent' : ' figure') + ' déjà sur la liste');
-    else if (added > 1) toast(added + ' convives inscrits');
-  }
-
-  function removePerson(id) {
-    state.people = state.people.filter(function (p) { return p.id !== id; });
-    state.exclusions = state.exclusions.filter(function (e) { return e[0] !== id && e[1] !== id; });
-    saveState();
-    renderAll();
-  }
-
-  /* ---------------- Incompatibilités ---------------- */
-  function renderExclusions() {
-    var a = $('#ex-a'), b = $('#ex-b');
-    [a, b].forEach(function (sel, idx) {
-      var prev = sel.value;
-      sel.replaceChildren(h('option', { value: '', text: idx === 0 ? 'Choisir…' : 'Choisir…' }));
-      state.people.forEach(function (p) { sel.appendChild(h('option', { value: p.id, text: p.name })); });
-      if (personById(prev)) sel.value = prev;
-    });
-    var dis = state.people.length < 2;
-    a.disabled = b.disabled = dis;
-    $('[data-ex-form] button').disabled = dis;
-
-    var ul = $('[data-ex-list]');
-    ul.replaceChildren();
-    state.exclusions.forEach(function (pair, i) {
-      var pa = personById(pair[0]), pb = personById(pair[1]);
-      if (!pa || !pb) return;
-      ul.appendChild(h('li', null,
-        h('span', null, pa.name, ' ', h('i', { text: '&' }), ' ', pb.name),
-        h('button', {
-          type: 'button', 'aria-label': 'Retirer l’incompatibilité ' + pa.name + ' et ' + pb.name, text: '×',
-          onclick: function () { state.exclusions.splice(i, 1); saveState(); renderAll(); }
-        })
+    names.forEach(function (name, i) {
+      list.appendChild(h('li', null,
+        h('span', { class: 'roll__num', text: roman(i + 1) + '.' }),
+        h('span', { class: 'roll__name', text: name })
       ));
     });
-    $('[data-no-cross]').checked = !!state.noCross;
   }
 
-  function addExclusion(a, b) {
-    if (!a || !b) { toast('Choisissez deux convives'); return; }
-    if (a === b) { toast('Choisissez deux convives différents'); return; }
-    var exists = state.exclusions.some(function (e) { return (e[0] === a && e[1] === b) || (e[0] === b && e[1] === a); });
-    if (exists) { toast('Cette incompatibilité existe déjà'); return; }
-    state.exclusions.push([a, b]);
-    saveState();
-    renderAll();
-  }
-
-  /* ---------------- Algorithme du tirage ---------------- */
-  // Renvoie p tel que le convive g offre à p[g], ou null si impossible.
-  function solve(n, forbid, noCross) {
-    function bad(g, r, p) { return r === g || forbid[g * n + r] || (noCross && p[r] === g); }
-    var base = [];
-    for (var i = 0; i < n; i++) base.push(i);
-
-    // 1) Tirage uniforme par rejet : chaque répartition valide est équiprobable.
-    for (var t = 0; t < 30000; t++) {
-      var p = shuffle(base.slice()), ok = true;
-      for (var g = 0; g < n && ok; g++) if (bad(g, p[g], p)) ok = false;
-      if (ok) return p;
-    }
-    // 2) Repli : recherche aléatoire avec retour arrière (contraintes très serrées).
-    var q = new Array(n).fill(-1), used = new Array(n).fill(false), steps = 0;
-    function dfs(g) {
-      if (g === n) return true;
-      if (++steps > 400000) return false;
-      var cands = shuffle(base.slice());
-      for (var k = 0; k < cands.length; k++) {
-        var r = cands[k];
-        if (used[r] || bad(g, r, q)) continue;
-        q[g] = r; used[r] = true;
-        if (dfs(g + 1)) return true;
-        q[g] = -1; used[r] = false;
-      }
-      return false;
-    }
-    return dfs(0) ? q : null;
-  }
-
-  function performDraw() {
-    var people = state.people, n = people.length;
-    var idx = {}; people.forEach(function (p, i) { idx[p.id] = i; });
-    var forbid = {};
-    state.exclusions.forEach(function (e) {
-      var a = idx[e[0]], b = idx[e[1]];
-      if (a == null || b == null) return;
-      forbid[a * n + b] = forbid[b * n + a] = true;
-    });
-    var perm = solve(n, forbid, !!state.noCross);
-    if (!perm) return false;
-    state.draw = {
-      at: Date.now(),
-      mail: people.map(function (p, g) {
-        return { id: p.id, name: p.name, token: sealToken({ v: 1, f: p.name, t: people[perm[g]].name, y: EDITION }), sent: false };
-      })
-    };
-    saveState();
-    return true;
-  }
-
-  /* ---------------- Rendu du tirage ---------------- */
-  function linkFor(token) {
-    return location.href.split('#')[0] + '#/m/' + token;
-  }
-
+  /* ---------------- Tirage : simple information ----------------
+     Le tirage est fait par l'organisateur hors du site (outils/tirage.mjs) ;
+     chacun reçoit son lien personnel en message privé. */
   function renderDraw() {
-    var box = $('[data-draw]');
-    box.replaceChildren();
-    var n = state.people.length;
-
-    if (!state.draw) {
-      var enough = n >= MIN_PEOPLE;
-      var msg = enough
-        ? 'La liste compte ' + n + ' convives. Une fois le tirage effectué, chacun recevra un lien personnel menant à sa missive scellée.'
-        : (n === 0
-          ? 'Le tirage sera ouvert dès que la liste des convives sera arrêtée.'
-          : 'Il faut au moins ' + MIN_PEOPLE + ' convives pour procéder au tirage (' + n + ' pour l’heure).');
-      box.appendChild(h('div', { class: 'draw-ready' },
-        h('p', { text: msg }),
-        h('button', { type: 'button', class: 'stamp', disabled: !enough, onclick: onDrawClick, text: 'Procéder au tirage' }),
-        h('p', { class: 'fine', text: 'Le résultat n’est affiché à personne ici : vous n’obtiendrez que des enveloppes fermées, une par convive.' })
-      ));
-      return;
-    }
-
-    var mail = state.draw.mail, sent = mail.filter(function (m) { return m.sent; }).length;
-    var when = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(new Date(state.draw.at)).replace(':', ' h ');
-
-    box.appendChild(h('div', { class: 'draw-done__head' },
-      h('h3', { text: 'Le sort en est jeté.' }),
-      h('p', { text: 'Tirage effectué le ' + when + '. Faites parvenir à chacun son enveloppe, et à lui seul.' }),
-      h('p', { class: 'progress-line', text: sent + ' / ' + mail.length + ' expédiée' + (sent > 1 ? 's' : '') })
+    var box = $('[data-draw]'), t = CFG.tirage || {}, done = !!t.effectue;
+    var when = t.date ? ' le ' + t.date : '';
+    box.replaceChildren(h('div', { class: 'draw-ready' },
+      h('p', { class: 'draw-status', text: done ? 'Le sort en est jeté.' : 'Le tirage approche.' }),
+      h('p', { text: done
+        ? 'Le tirage a été effectué' + when + '. Chaque convive a reçu, en message privé, un lien personnel vers sa missive scellée. Ouvre-la à l’abri des regards : elle te dira qui tu gâtes.'
+        : 'L’organisateur procédera bientôt au tirage. Chaque convive recevra alors, en message privé, un lien personnel vers sa missive scellée, que lui seul ouvrira.' }),
+      h('p', { class: 'fine', text: 'Pas reçu ton lien, ou lien illisible ? Demande à l’organisateur de te le renvoyer.' })
     ));
-
-    var ul = h('ul', { class: 'mailbag' });
-    mail.forEach(function (m) {
-      var link = linkFor(m.token);
-      var wa = 'https://wa.me/?text=' + encodeURIComponent(m.name + ', ta missive secrète pour le Noël de l’Élite t’attend. Ouvre-la à l’abri des regards : ' + link);
-      var actions = h('div', { class: 'mail__actions' },
-        h('button', { type: 'button', class: 'btn btn--ghost btn--small', text: 'Copier le lien', onclick: function () { copy(link).then(function (ok) { toast(ok ? 'Lien de ' + m.name + ' copié' : 'Copie impossible : sélectionnez le lien manuellement'); if (ok) markSent(m); }); } }),
-        h('a', { class: 'btn btn--ghost btn--small', href: wa, target: '_blank', rel: 'noopener', text: 'WhatsApp', onclick: function () { markSent(m); } }),
-        navigator.share ? h('button', { type: 'button', class: 'btn btn--ghost btn--small', text: 'Partager', onclick: function () {
-          navigator.share({ title: 'Le Noël de l’Élite', text: m.name + ', ta missive secrète t’attend.', url: link }).then(function () { markSent(m); }).catch(function () {});
-        } }) : null
-      );
-      ul.appendChild(h('li', { class: 'mail' + (m.sent ? ' is-sent' : ''), 'data-mail': m.id },
-        h('p', { class: 'mail__to', text: 'À l’attention de' }),
-        h('p', { class: 'mail__name', text: m.name }),
-        actions,
-        h('span', { class: 'mail__postmark', 'aria-hidden': 'true', text: 'Expédiée' })
-      ));
-    });
-    box.appendChild(ul);
-
-    box.appendChild(h('div', { class: 'draw-done__foot' },
-      h('button', { type: 'button', class: 'link-btn', text: 'Annuler le tirage (les liens déjà envoyés deviendront caducs)', onclick: function () {
-        if (!confirm('Annuler le tirage ? Les liens déjà envoyés ne correspondront plus à rien et il faudra tout renvoyer.')) return;
-        state.draw = null; saveState(); renderAll();
-        toast('Tirage annulé');
-      } })
-    ));
-  }
-
-  function markSent(m) {
-    if (m.sent) return;
-    m.sent = true;
-    saveState();
-    var card = $('[data-mail="' + m.id + '"]');
-    if (card) card.classList.add('is-sent');
-    var sent = state.draw.mail.filter(function (x) { return x.sent; }).length;
-    var line = $('.progress-line');
-    if (line) line.textContent = sent + ' / ' + state.draw.mail.length + ' expédiée' + (sent > 1 ? 's' : '');
-  }
-
-  function copy(text) {
-    if (navigator.clipboard && window.isSecureContext) {
-      return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return fallbackCopy(text); });
-    }
-    return Promise.resolve(fallbackCopy(text));
-  }
-  function fallbackCopy(text) {
-    var ta = h('textarea', { readonly: true, style: 'position:fixed;top:-1000px;opacity:0' });
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    var ok = false;
-    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
-    ta.remove();
-    return ok;
-  }
-
-  function onDrawClick() {
-    if (state.people.length < MIN_PEOPLE) return;
-    var ok = performDraw();
-    if (!ok) {
-      toast('Tirage impossible avec ces incompatibilités : assouplissez les contraintes');
-      return;
-    }
-    var box = $('[data-draw]');
-    if (reduceMotion) { renderAll(); return; }
-
-    // Petite mise en scène : les noms défilent dans l'urne.
-    var nameEl = h('div', { class: 'drum__name', 'aria-hidden': 'true' });
-    box.replaceChildren(h('div', { class: 'drum' }, h('p', { class: 'drum__label', text: 'Brassage de l’urne' }), nameEl));
-    var names = state.people.map(function (p) { return p.name; });
-    var start = Date.now(), last = -1;
-    (function spin() {
-      var el = Date.now() - start;
-      if (el > 1700) { renderAll(); $('#tirage').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
-      var i; do { i = randInt(names.length); } while (names.length > 1 && i === last);
-      last = i;
-      nameEl.textContent = names[i];
-      setTimeout(spin, 60 + el / 18);
-    })();
   }
 
   function renderAll() { renderRoll(); renderDraw(); }
@@ -1095,30 +808,9 @@
 
   /* ---------------- Initialisation ---------------- */
   function init() {
-    state = loadState();
     renderFacts();
     startCountdown();
     renderAll();
-
-    $('[data-add-form]').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var input = $('#new-name');
-      addPeople(input.value);
-      input.value = '';
-      input.focus();
-    });
-    $('[data-ex-form]').addEventListener('submit', function (e) {
-      e.preventDefault();
-      addExclusion($('#ex-a').value, $('#ex-b').value);
-    });
-    $('[data-no-cross]').addEventListener('change', function (e) {
-      state.noCross = e.target.checked; saveState();
-    });
-    $('[data-reset-all]').addEventListener('click', function () {
-      if (!confirm('Effacer la liste actuelle et repartir de celle définie dans la configuration ?')) return;
-      state = seedState(); saveState(); renderAll();
-      toast('Liste réinitialisée');
-    });
 
     window.addEventListener('hashchange', route);
     route();

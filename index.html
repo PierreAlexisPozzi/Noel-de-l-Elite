@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20">
+  <link rel="stylesheet" href="css/style.css?v=21">
 </head>
 <body>
   <!-- Ornement réutilisable : branche de houx -->
@@ -298,35 +298,6 @@
 
         <ol class="roll" data-roll></ol>
 
-        <div class="roll-tools" data-roll-tools>
-          <form class="inline-form" data-add-form autocomplete="off">
-            <label for="new-name" class="sr-only">Nom du convive</label>
-            <input id="new-name" name="name" type="text" maxlength="200" placeholder="Nom du convive (ou plusieurs, séparés par des virgules)">
-            <button type="submit" class="btn btn--ink">Inscrire</button>
-          </form>
-
-          <div class="exclusions">
-            <h3 class="subhead">Les incompatibilités</h3>
-            <p class="fine">Les couples, ou toute paire qui ne doit pas se tirer au sort l'un l'autre.</p>
-            <form class="inline-form inline-form--pair" data-ex-form>
-              <label for="ex-a" class="sr-only">Premier convive</label>
-              <select id="ex-a" name="a"></select>
-              <span class="pair-sep" aria-hidden="true">&amp;</span>
-              <label for="ex-b" class="sr-only">Second convive</label>
-              <select id="ex-b" name="b"></select>
-              <button type="submit" class="btn btn--ghost">Ajouter</button>
-            </form>
-            <ul class="pairs" data-ex-list></ul>
-            <label class="check">
-              <input type="checkbox" data-no-cross>
-              <span>Interdire les échanges croisés (A offre à B et B offre à A)</span>
-            </label>
-          </div>
-
-          <button type="button" class="link-btn" data-reset-all>Effacer la liste et repartir de la configuration</button>
-        </div>
-
-        <p class="locked-note" data-locked-note hidden>La liste est close depuis le tirage. Annulez le tirage pour la modifier.</p>
       </section>
 
       <!-- Tirage -->
@@ -338,7 +309,7 @@
 
     <footer class="colophon">
       <p>Gazette tirée à un seul exemplaire · Édition <span data-edition></span></p>
-      <p class="fine">Le tirage est effectué et conservé dans ce navigateur. Les liens secrets ne transitent par aucun serveur.</p>
+      <p class="fine">Les missives se décodent dans ton navigateur : leur contenu ne transite par aucun serveur.</p>
       <button type="button" class="link-btn" data-replay-intro>Réécouter le message du Père Noël</button>
     </footer>
   </div>
@@ -384,7 +355,7 @@
 
   <div class="toast" role="status" aria-live="polite" data-toast></div>
 
-  <script src="js/config.js?v=20"></script>
-  <script src="js/app.js?v=20"></script>
+  <script src="js/config.js?v=21"></script>
+  <script src="js/app.js?v=21"></script>
 </body>
 </html>
