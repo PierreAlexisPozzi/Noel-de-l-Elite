@@ -929,7 +929,7 @@
     function soundOn() { return !!audio && audio.state === 'running'; }
 
     // Sons enregistrés, chargés dès l'ouverture. Repli sur les sons synthétisés si besoin.
-    var SOUNDS = { hoho: 'audio/oh-oh-oh.mp3?v=16', fart: 'audio/prout-de-noel.mp3?v=12' };
+    var SOUNDS = { hoho: 'audio/oh-oh-oh.mp3?v=18', fart: 'audio/prout-de-noel.mp3?v=12' };
     var buffers = {}, loading = {};
     function loadSounds() {
       if (!audio || !window.fetch) return;
