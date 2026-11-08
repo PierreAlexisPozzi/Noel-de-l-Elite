@@ -30,8 +30,60 @@
 
   <canvas id="snow" aria-hidden="true"></canvas>
 
+  <!-- ===================== OUVERTURE : le message du Père Noël ===================== -->
+  <div class="intro" id="intro" hidden>
+    <div class="intro__bg" aria-hidden="true"></div>
+    <p class="intro__kicker">Le Noël de l'Élite · Édition <span data-edition></span></p>
+    <p class="intro__title">Le Père Noël a un message pour vous</p>
+
+    <button type="button" class="intro__stage" aria-label="Écouter le message du Père Noël">
+      <span class="intro__bang" aria-hidden="true"><span>Prout&#8239;!</span></span>
+      <svg class="butt" viewBox="0 0 300 270" aria-hidden="true">
+        <defs>
+          <radialGradient id="cheek-l" cx="36%" cy="34%" r="72%">
+            <stop offset="0" stop-color="#ffe3d1"/><stop offset=".55" stop-color="#f3bd9e"/><stop offset="1" stop-color="#d48d72"/>
+          </radialGradient>
+          <radialGradient id="cheek-r" cx="64%" cy="34%" r="72%">
+            <stop offset="0" stop-color="#ffe3d1"/><stop offset=".55" stop-color="#f3bd9e"/><stop offset="1" stop-color="#d48d72"/>
+          </radialGradient>
+        </defs>
+        <g class="butt__cheeks">
+          <g class="butt__cheek butt__cheek--l">
+            <circle cx="104" cy="150" r="78" fill="url(#cheek-l)"/>
+            <ellipse cx="78" cy="116" rx="22" ry="12" fill="#fff" opacity=".5" transform="rotate(-28 78 116)"/>
+            <ellipse cx="92" cy="176" rx="22" ry="12" fill="#e2807a" opacity=".3"/>
+          </g>
+          <g class="butt__cheek butt__cheek--r">
+            <circle cx="196" cy="150" r="78" fill="url(#cheek-r)"/>
+            <ellipse cx="222" cy="116" rx="22" ry="12" fill="#fff" opacity=".5" transform="rotate(28 222 116)"/>
+            <ellipse cx="208" cy="176" rx="22" ry="12" fill="#e2807a" opacity=".3"/>
+          </g>
+          <path d="M150 84 C145 122 147 166 150 214" stroke="#8a4a38" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <circle class="butt__origin" cx="150" cy="198" r="1" fill="none"/>
+        </g>
+        <!-- veste du Père Noël -->
+        <g>
+          <path d="M34 0 H266 Q294 26 292 62 Q150 86 8 62 Q6 26 34 0 Z" fill="#a01c22"/>
+          <path d="M8 62 Q150 86 292 62" stroke="#f6f1e6" stroke-width="22" stroke-linecap="round" fill="none"/>
+          <path d="M8 62 Q150 86 292 62" stroke="#ddd3c2" stroke-width="18" stroke-linecap="round" stroke-dasharray="1 11" fill="none"/>
+        </g>
+        <!-- pantalon baissé -->
+        <g>
+          <path d="M2 224 Q150 206 298 224 Q300 254 272 270 H28 Q0 254 2 224 Z" fill="#8f171d"/>
+          <path d="M2 224 Q150 206 298 224" stroke="#f6f1e6" stroke-width="24" stroke-linecap="round" fill="none"/>
+          <path d="M2 224 Q150 206 298 224" stroke="#ddd3c2" stroke-width="20" stroke-linecap="round" stroke-dasharray="1 12" fill="none"/>
+        </g>
+      </svg>
+      <span class="intro__puff" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+    </button>
+
+    <p class="intro__hint">Touchez l'écran pour l'écouter · montez le son</p>
+    <button type="button" class="intro__skip">Passer</button>
+  </div>
+
   <!-- ===================== GAZETTE ===================== -->
   <div id="view-home" class="sheet">
+    <div class="snowcap" aria-hidden="true"></div>
     <header class="masthead">
       <div class="masthead__meta">
         <span>Vol. I — N° <span data-edition-num>1</span></span>
@@ -140,6 +192,7 @@
     <footer class="colophon">
       <p>Gazette tirée à un seul exemplaire · Édition <span data-edition></span></p>
       <p class="fine">Le tirage est effectué et conservé dans ce navigateur. Les liens secrets ne transitent par aucun serveur.</p>
+      <button type="button" class="link-btn" data-replay-intro>Réécouter le message du Père Noël</button>
     </footer>
   </div>
 

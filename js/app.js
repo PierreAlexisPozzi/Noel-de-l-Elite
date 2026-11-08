@@ -528,47 +528,208 @@
     if (m) showReveal(m[1]); else showHome();
   }
 
-  /* ---------------- Neige ---------------- */
-  function snow() {
-    var cv = $('#snow');
-    if (!cv || !cv.getContext || reduceMotion) return;
-    var ctx = cv.getContext('2d'), flakes = [], W, H, dpr;
-    function resize() {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      W = window.innerWidth; H = window.innerHeight;
-      cv.width = W * dpr; cv.height = H * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      var target = Math.round(Math.min(110, W * H / 14000));
-      while (flakes.length < target) flakes.push(make(true));
-      flakes.length = target;
+  /* ---------------- Neige ----------------
+     Une seule couche de neige, au-dessus de la page. Les flocons « persistants »
+     reviennent en haut de l'écran quand ils sortent en bas : la neige reste. */
+  var Snow = (function () {
+    var cv, ctx, W = 0, H = 0, flakes = [], target = 0, running = false, t = 0;
+
+    function setup() {
+      if (ctx) return true;
+      if (reduceMotion) return false;
+      cv = $('#snow');
+      if (!cv || !cv.getContext) return false;
+      ctx = cv.getContext('2d');
+      window.addEventListener('resize', resize);
+      resize();
+      return true;
     }
-    function make(anywhere) {
+    function resize() {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth; H = window.innerHeight;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      target = Math.round(Math.min(90, W * H / 15000));
+    }
+    function flake(persist) {
       var r = Math.random();
       return {
-        x: Math.random() * W, y: anywhere ? Math.random() * H : -6,
-        r: 0.6 + r * r * 2.4, vy: 0.25 + r * 0.9, phase: Math.random() * 6.28, sway: 0.2 + Math.random() * 0.5,
-        a: 0.35 + r * 0.5
+        r: 0.7 + r * r * 2.3, term: 0.3 + r * 0.8, a: 0.6 + r * 0.4,
+        phase: Math.random() * 6.28, sway: 0.2 + Math.random() * 0.5,
+        x: 0, y: 0, vx: 0, vy: 0, persist: persist
       };
     }
-    var t = 0;
-    function frame() {
+    function persistent() {
+      var n = 0;
+      for (var i = 0; i < flakes.length; i++) if (flakes[i].persist) n++;
+      return n;
+    }
+    function loop() {
       t += 0.01;
       ctx.clearRect(0, 0, W, H);
-      for (var i = 0; i < flakes.length; i++) {
+      for (var i = flakes.length - 1; i >= 0; i--) {
         var f = flakes[i];
+        f.vx *= 0.965;
+        f.vy = f.vy < f.term ? f.vy * 0.985 + 0.14 : Math.max(f.term, f.vy * 0.97);
+        f.x += f.vx + Math.sin(t * 1.3 + f.phase) * f.sway * 0.5;
         f.y += f.vy;
-        f.x += Math.sin(t * 1.3 + f.phase) * f.sway * 0.5;
-        if (f.y > H + 6) { flakes[i] = make(false); continue; }
-        ctx.globalAlpha = f.a;
-        ctx.fillStyle = '#f6f1e6';
+        if (f.y > H + 8 || f.x < -40 || f.x > W + 40) {
+          if (!f.persist) { flakes.splice(i, 1); continue; }
+          f.x = Math.random() * W; f.y = -6; f.vx = 0; f.vy = f.term;
+        }
+        // léger contour sombre : le flocon reste visible sur le papier crème
+        ctx.globalAlpha = f.a * 0.28; ctx.fillStyle = '#26332b';
+        ctx.beginPath(); ctx.arc(f.x + 0.4, f.y + 0.7, f.r + 0.7, 0, 6.2832); ctx.fill();
+        ctx.globalAlpha = f.a; ctx.fillStyle = '#fffdf7';
         ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.2832); ctx.fill();
       }
-      requestAnimationFrame(frame);
+      requestAnimationFrame(loop);
     }
-    window.addEventListener('resize', resize);
-    resize();
-    requestAnimationFrame(frame);
+    function run() { if (!running) { running = true; requestAnimationFrame(loop); } }
+
+    return {
+      // Neige d'ambiance, déjà répartie sur l'écran.
+      ambient: function () {
+        if (!setup()) return;
+        for (var k = target - persistent(); k > 0; k--) {
+          var f = flake(true);
+          f.x = Math.random() * W; f.y = Math.random() * H; f.vy = f.term;
+          flakes.push(f);
+        }
+        run();
+      },
+      // Gerbe de neige projetée depuis un point de l'écran.
+      burst: function (x, y, n) {
+        if (!setup()) return;
+        var need = target - persistent();
+        for (var k = 0; k < n; k++) {
+          var f = flake(k < need);
+          var ang = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.5;
+          var sp = 5 + Math.random() * Math.random() * 22;
+          f.x = x + (Math.random() - 0.5) * 12; f.y = y;
+          f.vx = Math.cos(ang) * sp; f.vy = Math.sin(ang) * sp * 0.9;
+          flakes.push(f);
+        }
+        run();
+      }
+    };
+  })();
+
+  /* ---------------- Son (synthétisé, aucun fichier) ---------------- */
+  function fartSound(ac, t) {
+    var dur = 0.85 + Math.random() * 0.3;
+    var out = ac.createGain(); out.gain.value = 0.55; out.connect(ac.destination);
+    var env = ac.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(1, t + 0.025);
+    env.gain.setValueAtTime(1, t + dur * 0.55);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    env.connect(out);
+    var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 6;
+    lp.frequency.setValueAtTime(1100, t); lp.frequency.exponentialRampToValueAtTime(260, t + dur);
+    lp.connect(env);
+
+    // grondement : dent de scie grave qui descend
+    var osc = ac.createOscillator(); osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(105, t); osc.frequency.exponentialRampToValueAtTime(52, t + dur);
+    var wob = ac.createOscillator(); wob.frequency.value = 7;
+    var wobDepth = ac.createGain(); wobDepth.gain.value = 18;
+    wob.connect(wobDepth); wobDepth.connect(osc.frequency);
+    // « brrr » : modulation d'amplitude en créneaux
+    var flutter = ac.createOscillator(); flutter.type = 'square';
+    flutter.frequency.setValueAtTime(34, t); flutter.frequency.linearRampToValueAtTime(16, t + dur);
+    var flutDepth = ac.createGain(); flutDepth.gain.value = 0.45;
+    var vca = ac.createGain(); vca.gain.value = 0.55;
+    flutter.connect(flutDepth); flutDepth.connect(vca.gain);
+    osc.connect(vca); vca.connect(lp);
+    // souffle
+    var len = Math.floor(ac.sampleRate * dur), buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    var noise = ac.createBufferSource(); noise.buffer = buf;
+    var bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 350; bp.Q.value = 1.2;
+    var nGain = ac.createGain(); nGain.gain.value = 0.25;
+    noise.connect(bp); bp.connect(nGain); nGain.connect(lp);
+
+    [osc, wob, flutter, noise].forEach(function (n) { n.start(t); n.stop(t + dur + 0.05); });
   }
+
+  /* ---------------- Ouverture : le message du Père Noël ---------------- */
+  var Intro = (function () {
+    var KEY = 'noel-elite:intro-vue';
+    var el, timer, fired = false, audio = null;
+
+    function seen() { try { return sessionStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
+    function markSeen() { try { sessionStorage.setItem(KEY, '1'); } catch (e) { /* ignore */ } }
+    function snowcap() { document.body.classList.add('has-snowcap'); }
+
+    function show() {
+      el = $('#intro');
+      fired = false;
+      el.className = 'intro';
+      el.hidden = false;
+      document.documentElement.classList.add('intro-open');
+      window.scrollTo(0, 0);
+      clearTimeout(timer);
+      timer = setTimeout(fart, 5000); // sans interaction : le pet part tout seul (sans le son si le navigateur le bloque)
+    }
+    function end() {
+      el.hidden = true;
+      el.className = 'intro';
+      document.documentElement.classList.remove('intro-open');
+    }
+    function fart() {
+      if (fired) return;
+      fired = true;
+      clearTimeout(timer);
+      markSeen();
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) {
+          audio = audio || new AC();
+          if (audio.state === 'suspended') audio.resume();
+          fartSound(audio, audio.currentTime + 0.38);
+        }
+      } catch (e) { /* pas de son, tant pis */ }
+
+      el.classList.add('is-tension');
+      setTimeout(function () {
+        el.classList.remove('is-tension');
+        el.classList.add('is-farting');
+        var o = $('.butt__origin', el).getBoundingClientRect();
+        var x = o.left + o.width / 2, y = o.top + o.height / 2;
+        [[0, 90], [120, 70], [260, 50], [420, 30]].forEach(function (w) {
+          setTimeout(function () { Snow.burst(x, y, w[1]); }, w[0]);
+        });
+      }, 380);
+      setTimeout(function () { el.classList.add('is-leaving'); snowcap(); }, 2200);
+      setTimeout(end, 3200);
+    }
+    function skip() {
+      clearTimeout(timer);
+      fired = true;
+      markSeen();
+      end();
+      Snow.ambient();
+      snowcap();
+    }
+
+    return {
+      init: function () {
+        el = $('#intro');
+        el.addEventListener('click', function (e) {
+          if (e.target.closest('.intro__skip')) skip(); else fart();
+        });
+        document.addEventListener('keydown', function (e) {
+          if (el.hidden || fired) return;
+          if (e.key === 'Escape') skip();
+          else if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button')) { e.preventDefault(); fart(); }
+        });
+      },
+      shouldPlay: function () { return !reduceMotion && !seen(); },
+      show: show,
+      skip: skip
+    };
+  })();
 
   /* ---------------- Initialisation ---------------- */
   function init() {
@@ -599,7 +760,11 @@
 
     window.addEventListener('hashchange', route);
     route();
-    snow();
+
+    Intro.init();
+    $('[data-replay-intro]').addEventListener('click', function () { Intro.show(); });
+    if (!/^#\/m\//.test(location.hash) && Intro.shouldPlay()) Intro.show();
+    else Intro.skip();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
