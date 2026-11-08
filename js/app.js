@@ -197,7 +197,8 @@
       var raw = localStorage.getItem(STORE_KEY);
       if (raw) {
         var s = JSON.parse(raw);
-        if (s && Array.isArray(s.people)) return s;
+        // Une liste locale vide (sans tirage) ne masque pas celle de la configuration.
+        if (s && Array.isArray(s.people) && (s.people.length || s.draw)) return s;
       }
     } catch (e) { /* stockage indisponible */ }
     return seedState();

@@ -16,9 +16,11 @@ window.NOEL_CONFIG = {
     tenue: "Pull de Noël de rigueur",
   },
 
-  // Liste initiale des convives (peut aussi être saisie directement sur le site).
-  // ex. ["Pierre-Alexis", "Camille", "Thomas", "Léa"]
-  participants: [],
+  // Liste des convives (peut aussi être complétée directement sur le site).
+  participants: [
+    "Mathis", "Dani", "Vianney", "Ikram", "Boris",
+    "Zoé", "Aurélien", "Mathilde", "PA", "Coralie",
+  ],
 
   // Paires qui ne doivent pas se tirer mutuellement (couples, etc.).
   // ex. [["Camille", "Thomas"]]
