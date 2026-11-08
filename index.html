@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=7">
+  <link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
   <!-- Ornement réutilisable : branche de houx -->
@@ -52,56 +52,152 @@
         <!-- découpes qui se dressent -->
         <div class="pop pop--elf" data-pinup="elf" aria-hidden="true"></div>
         <div class="pop pop--claus" data-pinup="claus" aria-hidden="true"></div>
-        <div class="pop pop--butt" aria-hidden="true">
+        <div class="pop pop--santa" aria-hidden="true">
           <span class="intro__bang"><span>Prout&#8239;!</span></span>
-          <svg class="butt" viewBox="-10 -10 320 290">
-            <defs>
-              <radialGradient id="cheek-l" cx="38%" cy="32%" r="75%">
-                <stop offset="0" stop-color="#ffe6d6"/><stop offset=".5" stop-color="#f5c3a5"/><stop offset="1" stop-color="#d98f73"/>
-              </radialGradient>
-              <radialGradient id="cheek-r" cx="62%" cy="32%" r="75%">
-                <stop offset="0" stop-color="#ffe6d6"/><stop offset=".5" stop-color="#f5c3a5"/><stop offset="1" stop-color="#d98f73"/>
-              </radialGradient>
-            </defs>
-            <g filter="url(#diecut)">
-              <g class="butt__cheeks" stroke="#3a2318" stroke-width="2.5" stroke-linejoin="round">
-                <g class="butt__cheek butt__cheek--l">
-                  <path d="M150 84 C118 70 62 78 42 128 C26 172 50 222 102 228 C130 231 147 216 150 198 Z" fill="url(#cheek-l)"/>
-                  <ellipse cx="80" cy="114" rx="22" ry="11" fill="#fff" opacity=".55" stroke="none" transform="rotate(-30 80 114)"/>
-                  <ellipse cx="92" cy="182" rx="22" ry="11" fill="#ea7f78" opacity=".3" stroke="none"/>
-                  <path d="M70 212 Q100 226 132 218" fill="none" stroke="#c98468" stroke-width="2.5" opacity=".7"/>
-                  <use href="#holly" x="62" y="134" width="44" height="26" class="butt__tattoo" stroke="none" transform="rotate(-14 84 147)"/>
+          <div class="santa" data-santa>
+            <!-- Père Noël de face : gros ventre, regard malicieux -->
+            <div class="santa__face santa__face--front">
+              <svg class="santa__svg santa__front" viewBox="-10 -10 320 440">
+                <g filter="url(#diecut)" stroke="#3a2318" stroke-width="2.5" stroke-linejoin="round">
+                  <path d="M92 300 L140 300 L138 362 L88 362 Z" fill="#8f171d"/>
+                  <path d="M208 300 L160 300 L162 362 L212 362 Z" fill="#8f171d"/>
+                  <path d="M86 368 L138 368 L139 404 Q139 414 128 414 L76 414 Q64 414 70 402 L86 390 Z" fill="#1d1a17"/>
+                  <path d="M214 368 L162 368 L161 404 Q161 414 172 414 L224 414 Q236 414 230 402 L214 390 Z" fill="#1d1a17"/>
+                  <rect x="82" y="354" width="60" height="16" rx="7" fill="#fbf6ec"/>
+                  <rect x="158" y="354" width="60" height="16" rx="7" fill="#fbf6ec"/>
+                  <!-- bras -->
+                  <path d="M92 172 Q48 206 50 262" fill="none" stroke-width="34" stroke-linecap="round"/>
+                  <path d="M92 172 Q48 206 50 262" fill="none" stroke="#b01f26" stroke-width="29" stroke-linecap="round"/>
+                  <path d="M208 172 Q252 206 250 262" fill="none" stroke-width="34" stroke-linecap="round"/>
+                  <path d="M208 172 Q252 206 250 262" fill="none" stroke="#b01f26" stroke-width="29" stroke-linecap="round"/>
+                  <ellipse cx="50" cy="266" rx="18" ry="9" fill="#fbf6ec"/>
+                  <ellipse cx="250" cy="266" rx="18" ry="9" fill="#fbf6ec"/>
+                  <circle cx="50" cy="285" r="14" fill="#2f7040"/>
+                  <circle cx="250" cy="285" r="14" fill="#2f7040"/>
+                  <!-- le ventre -->
+                  <g class="santa__belly">
+                    <path d="M104 158 Q150 148 196 158 C236 176 262 220 258 262 C256 296 232 314 200 318 L100 318 C68 314 44 296 42 262 C38 220 64 176 104 158 Z" fill="#b01f26"/>
+                    <ellipse cx="116" cy="226" rx="38" ry="24" fill="#fff" opacity=".13" stroke="none"/>
+                    <path d="M150 200 V314" fill="none" stroke-width="24" stroke-linecap="round"/>
+                    <path d="M150 200 V314" fill="none" stroke="#fbf6ec" stroke-width="19" stroke-linecap="round"/>
+                    <path d="M74 314 Q150 330 226 314" fill="none" stroke-width="24" stroke-linecap="round"/>
+                    <path d="M74 314 Q150 330 226 314" fill="none" stroke="#fbf6ec" stroke-width="19" stroke-linecap="round"/>
+                    <path d="M44 248 Q150 270 256 248 L258 272 Q150 294 42 272 Z" fill="#1d1a17"/>
+                    <rect x="126" y="256" width="48" height="30" rx="4" fill="none" stroke="#d9a73a" stroke-width="6"/>
+                    <path d="M150 263 V279" stroke="#d9a73a" stroke-width="4" stroke-linecap="round"/>
+                  </g>
+                  <!-- la tête -->
+                  <circle cx="111" cy="94" r="13" fill="#fbf6ec"/>
+                  <circle cx="189" cy="94" r="13" fill="#fbf6ec"/>
+                  <ellipse cx="150" cy="104" rx="38" ry="36" fill="#f5c8a8"/>
+                  <path d="M100 112 C92 146 102 176 120 192 C128 204 140 212 150 214 C160 212 172 204 180 192 C198 176 208 146 200 112 C186 132 170 138 150 138 C130 138 114 132 100 112 Z" fill="#fbf6ec"/>
+                  <path d="M116 168 q8 8 16 0 M150 186 q8 8 16 0 M130 198 q8 6 14 0 M168 164 q8 8 16 0" fill="none" stroke="#d8cdb9" stroke-width="2"/>
+                  <path d="M136 146 Q152 158 170 141 Q156 151 136 146 Z" fill="#7a2a22" stroke-width="2"/>
+                  <circle cx="124" cy="118" r="10" fill="#ec8f86" opacity=".55" stroke="none"/>
+                  <circle cx="176" cy="118" r="10" fill="#ec8f86" opacity=".55" stroke="none"/>
+                  <path d="M150 130 C138 120 114 124 108 140 C120 134 134 140 150 136 Z" fill="#fbf6ec"/>
+                  <path d="M150 130 C162 120 186 124 192 140 C180 134 166 140 150 136 Z" fill="#fbf6ec"/>
+                  <ellipse cx="150" cy="120" rx="10" ry="9" fill="#ea8e7e"/>
+                  <g class="santa__eyes">
+                    <ellipse cx="134" cy="103" rx="7" ry="5.5" fill="#fff" stroke-width="1.5"/>
+                    <ellipse cx="166" cy="103" rx="7" ry="5.5" fill="#fff" stroke-width="1.5"/>
+                    <circle cx="138" cy="104" r="3.3" fill="#3a2318" stroke="none"/>
+                    <circle cx="170" cy="104" r="3.3" fill="#3a2318" stroke="none"/>
+                    <path d="M126 104 Q126 95 134 95 Q142 95 142 104 Q134 100 126 104 Z" fill="#f0b897" stroke-width="1.5"/>
+                    <path d="M158 104 Q158 95 166 95 Q174 95 174 104 Q166 100 158 104 Z" fill="#f0b897" stroke-width="1.5"/>
+                  </g>
+                  <g class="santa__brow">
+                    <path d="M122 91 Q132 87 143 94" fill="none" stroke-width="9" stroke-linecap="round"/>
+                    <path d="M122 91 Q132 87 143 94" fill="none" stroke="#fbf6ec" stroke-width="6" stroke-linecap="round"/>
+                  </g>
+                  <g class="santa__brow santa__brow--up">
+                    <path d="M158 89 Q170 80 182 87" fill="none" stroke-width="9" stroke-linecap="round"/>
+                    <path d="M158 89 Q170 80 182 87" fill="none" stroke="#fbf6ec" stroke-width="6" stroke-linecap="round"/>
+                  </g>
+                  <!-- bonnet -->
+                  <path d="M108 68 Q114 20 160 12 Q200 8 220 42 Q202 32 186 40 Q180 50 192 66 Z" fill="#b01f26"/>
+                  <path d="M104 70 Q150 54 196 70" fill="none" stroke-width="24" stroke-linecap="round"/>
+                  <path d="M104 70 Q150 54 196 70" fill="none" stroke="#fbf6ec" stroke-width="20" stroke-linecap="round"/>
+                  <circle cx="222" cy="44" r="13" fill="#fbf6ec"/>
                 </g>
-                <g class="butt__cheek butt__cheek--r">
-                  <path d="M150 84 C182 70 238 78 258 128 C274 172 250 222 198 228 C170 231 153 216 150 198 Z" fill="url(#cheek-r)"/>
-                  <ellipse cx="220" cy="114" rx="22" ry="11" fill="#fff" opacity=".55" stroke="none" transform="rotate(30 220 114)"/>
-                  <ellipse cx="208" cy="182" rx="22" ry="11" fill="#ea7f78" opacity=".3" stroke="none"/>
-                  <path d="M168 218 Q200 226 230 212" fill="none" stroke="#c98468" stroke-width="2.5" opacity=".7"/>
+              </svg>
+            </div>
+
+            <!-- Père Noël de dos : pantalon baissé -->
+            <div class="santa__face santa__face--back">
+              <svg class="santa__svg butt" viewBox="-10 -10 320 440">
+                <defs>
+                  <radialGradient id="cheek-l" cx="38%" cy="32%" r="75%">
+                    <stop offset="0" stop-color="#ffe6d6"/><stop offset=".5" stop-color="#f5c3a5"/><stop offset="1" stop-color="#d98f73"/>
+                  </radialGradient>
+                  <radialGradient id="cheek-r" cx="62%" cy="32%" r="75%">
+                    <stop offset="0" stop-color="#ffe6d6"/><stop offset=".5" stop-color="#f5c3a5"/><stop offset="1" stop-color="#d98f73"/>
+                  </radialGradient>
+                </defs>
+                <g filter="url(#diecut)" stroke="#3a2318" stroke-width="2.5" stroke-linejoin="round">
+                  <path d="M86 368 L138 368 L139 404 Q139 414 128 414 L76 414 Q64 414 70 402 L86 390 Z" fill="#1d1a17"/>
+                  <path d="M214 368 L162 368 L161 404 Q161 414 172 414 L224 414 Q236 414 230 402 L214 390 Z" fill="#1d1a17"/>
+                  <rect x="82" y="354" width="60" height="16" rx="7" fill="#fbf6ec"/>
+                  <rect x="158" y="354" width="60" height="16" rx="7" fill="#fbf6ec"/>
+                  <!-- cuisses et pantalon tombé aux genoux -->
+                  <path d="M92 300 L146 304 L144 340 L90 338 Z" fill="#f5c3a5"/>
+                  <path d="M208 300 L154 304 L156 340 L210 338 Z" fill="#f5c3a5"/>
+                  <path d="M82 328 Q150 342 218 328 L222 362 Q150 376 78 362 Z" fill="#8f171d"/>
+                  <path d="M104 340 Q112 352 106 364 M150 344 V368 M196 340 Q188 352 194 364" fill="none" stroke="#5e0d12" stroke-width="2"/>
+                  <!-- bras -->
+                  <path d="M92 172 Q48 206 50 262" fill="none" stroke-width="34" stroke-linecap="round"/>
+                  <path d="M92 172 Q48 206 50 262" fill="none" stroke="#b01f26" stroke-width="29" stroke-linecap="round"/>
+                  <path d="M208 172 Q252 206 250 262" fill="none" stroke-width="34" stroke-linecap="round"/>
+                  <path d="M208 172 Q252 206 250 262" fill="none" stroke="#b01f26" stroke-width="29" stroke-linecap="round"/>
+                  <ellipse cx="50" cy="266" rx="18" ry="9" fill="#fbf6ec"/>
+                  <ellipse cx="250" cy="266" rx="18" ry="9" fill="#fbf6ec"/>
+                  <circle cx="50" cy="285" r="14" fill="#2f7040"/>
+                  <circle cx="250" cy="285" r="14" fill="#2f7040"/>
+                  <!-- dos du manteau -->
+                  <path d="M100 156 Q150 146 200 156 C234 172 254 204 256 242 L44 242 C46 204 66 172 100 156 Z" fill="#b01f26"/>
+                  <path d="M150 160 V236" fill="none" stroke="#861419" stroke-width="2"/>
+                  <path d="M48 212 L252 212 L254 232 L46 232 Z" fill="#1d1a17"/>
+                  <!-- les fesses -->
+                  <svg x="52" y="224" width="196" height="136" viewBox="30 68 240 166" overflow="visible">
+                    <g class="butt__cheeks">
+                      <path d="M128 80 Q150 74 172 80 L170 224 Q150 232 130 224 Z" fill="#c98468" stroke="none"/>
+                      <g class="butt__cheek butt__cheek--l">
+                        <path d="M150 84 C118 70 62 78 42 128 C26 172 50 222 102 228 C130 231 147 216 150 198 Z" fill="url(#cheek-l)"/>
+                        <ellipse cx="80" cy="114" rx="22" ry="11" fill="#fff" opacity=".55" stroke="none" transform="rotate(-30 80 114)"/>
+                        <ellipse cx="92" cy="182" rx="22" ry="11" fill="#ea7f78" opacity=".3" stroke="none"/>
+                        <path d="M70 212 Q100 226 132 218" fill="none" stroke="#c98468" stroke-width="2.5" opacity=".7"/>
+                        <use href="#holly" x="62" y="134" width="44" height="26" class="butt__tattoo" stroke="none" transform="rotate(-14 84 147)"/>
+                      </g>
+                      <g class="butt__cheek butt__cheek--r">
+                        <path d="M150 84 C182 70 238 78 258 128 C274 172 250 222 198 228 C170 231 153 216 150 198 Z" fill="url(#cheek-r)"/>
+                        <ellipse cx="220" cy="114" rx="22" ry="11" fill="#fff" opacity=".55" stroke="none" transform="rotate(30 220 114)"/>
+                        <ellipse cx="208" cy="182" rx="22" ry="11" fill="#ea7f78" opacity=".3" stroke="none"/>
+                        <path d="M168 218 Q200 226 230 212" fill="none" stroke="#c98468" stroke-width="2.5" opacity=".7"/>
+                      </g>
+                      <path d="M150 86 C146 124 147 166 150 212" fill="none" stroke-width="3" stroke-linecap="round"/>
+                      <circle class="butt__origin" cx="150" cy="198" r="1" fill="none" stroke="none"/>
+                    </g>
+                  </svg>
+                  <!-- manteau relevé -->
+                  <path d="M40 242 Q150 228 260 242" fill="none" stroke-width="25" stroke-linecap="round"/>
+                  <path d="M40 242 Q150 228 260 242" fill="none" stroke="#fbf6ec" stroke-width="20" stroke-linecap="round"/>
+                  <!-- tête de dos -->
+                  <ellipse cx="112" cy="128" rx="14" ry="20" fill="#fbf6ec"/>
+                  <ellipse cx="188" cy="128" rx="14" ry="20" fill="#fbf6ec"/>
+                  <ellipse cx="150" cy="104" rx="39" ry="38" fill="#fbf6ec"/>
+                  <path d="M126 90 q-4 18 0 40 M138 84 q-3 22 1 52 M150 82 q-3 26 0 58 M162 84 q3 22 -1 52 M174 90 q4 18 0 40" fill="none" stroke="#d8cdb9" stroke-width="2.2" stroke-linecap="round"/>
+                  <circle cx="112" cy="104" r="7" fill="#f5c8a8"/>
+                  <circle cx="188" cy="104" r="7" fill="#f5c8a8"/>
+                  <g transform="translate(300 0) scale(-1 1)">
+                    <path d="M108 68 Q114 20 160 12 Q200 8 220 42 Q202 32 186 40 Q180 50 192 66 Z" fill="#b01f26"/>
+                    <path d="M104 70 Q150 54 196 70" fill="none" stroke-width="24" stroke-linecap="round"/>
+                    <path d="M104 70 Q150 54 196 70" fill="none" stroke="#fbf6ec" stroke-width="20" stroke-linecap="round"/>
+                    <circle cx="222" cy="44" r="13" fill="#fbf6ec"/>
+                  </g>
                 </g>
-                <path d="M150 86 C146 124 147 166 150 212" fill="none" stroke-width="3" stroke-linecap="round"/>
-                <circle class="butt__origin" cx="150" cy="198" r="1" fill="none" stroke="none"/>
-              </g>
-              <!-- veste, ceinture et fourrure -->
-              <g stroke="#3a2318" stroke-width="2.5" stroke-linejoin="round">
-                <path d="M30 0 H270 Q296 30 294 66 Q150 92 6 66 Q4 30 30 0 Z" fill="#b01f26"/>
-                <path d="M16 24 Q150 40 284 24 L286 44 Q150 60 14 44 Z" fill="#1d1a17"/>
-                <rect x="128" y="26" width="44" height="30" rx="4" fill="none" stroke="#d9a73a" stroke-width="5"/>
-                <rect x="128" y="26" width="44" height="30" rx="4" fill="none" stroke="#3a2318" stroke-width="1"/>
-                <path d="M150 34 V48" stroke="#d9a73a" stroke-width="4" stroke-linecap="round"/>
-                <path d="M6 66 Q150 92 294 66" fill="none" stroke-width="26" stroke-linecap="round"/>
-                <path d="M6 66 Q150 92 294 66" fill="none" stroke="#fbf6ec" stroke-width="21" stroke-linecap="round"/>
-                <path d="M6 66 Q150 92 294 66" fill="none" stroke="#e2d8c6" stroke-width="16" stroke-linecap="round" stroke-dasharray="1 10"/>
-              </g>
-              <!-- pantalon baissé -->
-              <g stroke="#3a2318" stroke-width="2.5" stroke-linejoin="round">
-                <path d="M2 222 Q150 204 298 222 Q300 254 272 270 H28 Q0 254 2 222 Z" fill="#8f171d"/>
-                <path d="M150 224 V270" stroke="#6d1015" stroke-width="2"/>
-                <path d="M2 222 Q150 204 298 222" fill="none" stroke-width="25" stroke-linecap="round"/>
-                <path d="M2 222 Q150 204 298 222" fill="none" stroke="#fbf6ec" stroke-width="20" stroke-linecap="round"/>
-                <path d="M2 222 Q150 204 298 222" fill="none" stroke="#e2d8c6" stroke-width="15" stroke-linecap="round" stroke-dasharray="1 11"/>
-              </g>
-            </g>
-          </svg>
+              </svg>
+            </div>
+          </div>
           <span class="intro__puff"><i></i><i></i><i></i><i></i><i></i><i></i></span>
         </div>
 
@@ -281,7 +377,7 @@
 
   <div class="toast" role="status" aria-live="polite" data-toast></div>
 
-  <script src="js/config.js?v=7"></script>
-  <script src="js/app.js?v=7"></script>
+  <script src="js/config.js?v=9"></script>
+  <script src="js/app.js?v=9"></script>
 </body>
 </html>

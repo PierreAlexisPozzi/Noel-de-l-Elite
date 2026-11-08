@@ -717,18 +717,32 @@ html.intro-open { overflow: hidden; }
   transition: transform .8s cubic-bezier(.3,1.55,.5,1) var(--delay), opacity .15s linear var(--delay);
 }
 .pcard.is-open .pop { transform: translateZ(var(--z)) rotateX(0deg); opacity: 1; }
-.pop svg { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 10px 8px rgba(0,0,0,.35)); }
+.pop > svg, .santa__svg { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 10px 8px rgba(0,0,0,.35)); }
 .pop--elf   { left: 2%;  width: 20.5%; --z: calc(var(--depth) * .45); --delay: .55s; }
 .pop--claus { right: 2%; width: 20.5%; --z: calc(var(--depth) * .45); --delay: .7s; }
-.pop--butt  { left: 30%; width: 40%; --z: var(--depth); --delay: .85s; bottom: calc(var(--h) * -.02); }
+.pop--santa { left: 32%; width: 36%; --z: var(--depth); --delay: .85s; transform-style: preserve-3d; }
+
+/* ---- Le Père Noël : de face, puis demi-tour ---- */
+.santa { position: relative; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.5,-.2,.3,1.25); }
+.santa.is-turned { transform: rotateY(180deg); }
+.santa__face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.santa__face--back { position: absolute; inset: 0; transform: rotateY(180deg); }
+.santa__belly, .santa__brow--up, .santa__eyes { transform-box: fill-box; }
+.santa__belly { transform-origin: 50% 100%; }
+.pcard.is-open .santa__belly { animation: belly .55s ease-in-out 1.7s 4; }
+.pcard.is-open .santa__brow--up { animation: brow .5s ease-in-out 1.9s 4; }
+.pcard.is-open .santa__eyes { animation: glance 2.4s ease-in-out 1.7s 1; }
+@keyframes belly { 50% { transform: scale(1.04, .96); } }
+@keyframes brow { 50% { transform: translateY(-4px) rotate(-6deg); } }
+@keyframes glance { 0%, 100% { transform: none; } 30%, 60% { transform: translateX(-3px); } }
 
 /* ---- Les fesses ---- */
 .butt__tattoo { color: #2f5d3a; opacity: .85; }
 .butt__cheek { transform-box: view-box; }
 .butt__cheek--l { transform-origin: 104px 228px; }
 .butt__cheek--r { transform-origin: 196px 228px; }
-.pcard.is-open .butt__cheek--l { animation: twerk-l 1.1s ease-in-out 1.6s infinite; }
-.pcard.is-open .butt__cheek--r { animation: twerk-r 1.1s ease-in-out 1.6s infinite; }
+.santa.is-turned .butt__cheek--l { animation: twerk-l .55s ease-in-out .8s infinite; }
+.santa.is-turned .butt__cheek--r { animation: twerk-r .55s ease-in-out .8s infinite; }
 @keyframes twerk-l { 0%, 100% { transform: none; } 50% { transform: translateY(-6px) rotate(-2.5deg); } }
 @keyframes twerk-r { 0%, 100% { transform: translateY(-6px) rotate(2.5deg); } 50% { transform: none; } }
 
@@ -757,8 +771,8 @@ html.intro-open { overflow: hidden; }
 
 .intro__bang {
   position: absolute; z-index: 2;
-  top: -30%; right: -16%;
-  width: 46%; aspect-ratio: 1.3;
+  top: 34%; right: -22%;
+  width: 56%; aspect-ratio: 1.3;
   display: grid; place-items: center;
   background: var(--paper);
   clip-path: polygon(50% -2%, 58% 16%, 72% 6%, 72% 22%, 91% 18%, 82% 35%, 99% 39%, 86% 50%, 102% 62%, 82% 65%, 89% 81%, 72% 78%, 73% 97%, 58% 84%, 50% 99%, 42% 84%, 27% 97%, 28% 78%, 11% 81%, 18% 65%, -2% 62%, 14% 50%, 1% 39%, 18% 35%, 9% 18%, 28% 22%, 28% 6%, 42% 16%);
@@ -773,7 +787,7 @@ html.intro-open { overflow: hidden; }
 @keyframes bang { to { transform: scale(1) rotate(-8deg); } }
 
 /* nuage */
-.intro__puff { position: absolute; left: 50%; top: 73%; width: 0; height: 0; pointer-events: none; }
+.intro__puff { position: absolute; left: 50%; top: 77%; width: 0; height: 0; pointer-events: none; }
 .intro__puff i {
   position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; border-radius: 50%;
   background: radial-gradient(circle, rgba(250,248,240,.95) 0%, rgba(250,248,240,.6) 45%, transparent 70%);
@@ -803,7 +817,7 @@ html.intro-open { overflow: hidden; }
   .pcard { --h: calc(var(--w) * .86); --depth: calc(var(--w) * .12); }
   .pop--elf, .pop--claus { width: 29%; }
   .pop--elf { left: 0; } .pop--claus { right: 0; }
-  .pop--butt { left: 22%; width: 56%; }
+  .pop--santa { left: 24%; width: 52%; }
   .pcard__banner { top: 4%; }
   .pcard.is-open .pcard__cover { transform: translateZ(0) rotateX(-114deg); }
   .pcard__face--in { padding-top: calc(var(--h) * .42); }

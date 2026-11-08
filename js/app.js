@@ -715,7 +715,8 @@
   }
 
   /* ---------------- Pin-ups de la carte (SVG dessinés à la main) ----------------
-     Même silhouette pour les deux : la Mère Noël est la version miroir, autrement habillée. */
+     Même silhouette pour les deux : la Mère Noël est la version miroir, autrement habillée.
+     Seins nus, chaque téton caché par une petite tête de lutin. */
   function pinupSVG(kind) {
     var elf = kind === 'elf';
     var id = 'pin-' + kind;
@@ -728,6 +729,19 @@
     var S = ' stroke="' + ink + '" stroke-width="2" stroke-linejoin="round"';
     function line(d, color, w) { return '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
     function limb(d, w, color) { return line(d, ink, w + 3) + line(d, color, w); }
+    function elfHead(x, y, k) {
+      var s1 = ' stroke="' + ink + '" stroke-width="1.1" stroke-linejoin="round"', face = '#f9d2b6';
+      return '<g transform="translate(' + x + ' ' + y + ') scale(' + (k || 1) + ')">' +
+        '<path d="M-5 -1 L-11 -5 L-6 3 Z" fill="' + face + '"' + s1 + '/><path d="M5 -1 L11 -5 L6 3 Z" fill="' + face + '"' + s1 + '/>' +
+        '<circle r="6.6" fill="' + face + '"' + s1 + '/>' +
+        '<path d="M-7 -2 Q-2 -15 9 -16 Q6 -10 7 -2 Z" fill="#2f7040"' + s1 + '/>' +
+        '<path d="M-7.2 -2 Q0 -5 7.2 -2" fill="none" stroke="#b3242a" stroke-width="2.6" stroke-linecap="round"/>' +
+        '<circle cx="9.5" cy="-16" r="2" fill="' + gold + '"' + s1 + '/>' +
+        '<circle cx="-2.3" cy="1" r=".95" fill="' + ink + '"/><circle cx="2.3" cy="1" r=".95" fill="' + ink + '"/>' +
+        '<path d="M-2.2 3.3 Q0 5.2 2.2 3.3" fill="none" stroke="' + ink + '" stroke-width=".9" stroke-linecap="round"/>' +
+        '<circle cx="-4.2" cy="3" r="1.3" fill="#ec8f86" opacity=".7"/><circle cx="4.2" cy="3" r="1.3" fill="#ec8f86" opacity=".7"/>' +
+        '</g>';
+    }
 
     var defs = elf
       ? '<pattern id="' + id + '-stripes" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(-10)">' +
@@ -760,22 +774,23 @@
       g += limb('M48 258 Q104 274 160 258', 11, trim);
     }
     g += line('M104 192 L103 258', dressS, 2) + line('M93 196 Q80 228 72 254', dressS, 2) + line('M116 196 Q128 228 138 254', dressS, 2);
-    // buste
-    g += '<path d="M72 128 C72 120 136 120 136 128 C138 150 126 162 122 184 L86 184 C82 162 70 150 72 128 Z" fill="' + dress + '"' + S + '/>';
-    g += '<path d="M80 125 Q104 119 128 125 Q123 138 113 137 Q104 131 95 137 Q85 138 80 125 Z" fill="' + skin + '"' + S + '/>';
-    g += limb('M80 126 Q86 140 96 137 Q104 132 112 137 Q122 140 128 126', 4, trim);
+    // buste nu : une tête de lutin sur chaque téton
+    g += '<path d="M72 128 C72 120 136 120 136 128 C138 150 126 162 122 184 L86 184 C82 162 70 150 72 128 Z" fill="' + skin + '"' + S + '/>';
+    // poitrine généreuse, façon pin-up
+    g += '<ellipse cx="87" cy="151" rx="20" ry="19" fill="' + skin + '"' + S + '/>';
+    g += '<ellipse cx="121" cy="151" rx="20" ry="19" fill="' + skin + '"' + S + '/>';
+    g += '<ellipse cx="80" cy="142" rx="7" ry="4" fill="#fff" opacity=".35" transform="rotate(-25 80 142)"/>';
+    g += '<ellipse cx="114" cy="142" rx="7" ry="4" fill="#fff" opacity=".35" transform="rotate(-25 114 142)"/>';
+    g += line('M74 160 Q86 172 100 164', skinS, 1.6) + line('M108 164 Q122 172 134 160', skinS, 1.6);
+    g += elfHead(88, 155, 1.25) + elfHead(120, 155, 1.25);
     // ceinture
     g += '<rect x="84" y="174" width="40" height="10" fill="#1d1a17"' + S + '/>';
     g += '<rect x="97" y="172" width="14" height="14" rx="2" fill="none" stroke="' + gold + '" stroke-width="3"/>';
     // bras sur la hanche
     g += limb('M74 132 Q50 150 54 170 Q64 182 84 181', 9, skin);
-    g += limb('M74 132 Q61 141 57 152', 13, dress);
-    if (!elf) g += '<circle cx="57" cy="153" r="7" fill="' + trim + '"' + S + '/>';
     g += '<ellipse cx="85" cy="181" rx="6" ry="5" fill="' + skin + '"' + S + '/>';
     // bras levé, avec un accessoire
     g += limb('M134 132 Q166 114 161 92 Q157 68 150 50', 9, skin);
-    g += limb('M134 132 Q150 124 158 112', 13, dress);
-    if (!elf) g += '<circle cx="158" cy="112" r="7" fill="' + trim + '"' + S + '/>';
     if (elf) {
       // sucre d'orge
       g += line('M150 74 L150 24 Q150 10 162 10 Q174 10 174 22', ink, 10);
@@ -830,7 +845,7 @@
 
   /* ---------------- Ouverture : la carte pop-up du Père Noël ---------------- */
   var Intro = (function () {
-    var el, card, hint, openTimer, fartTimer, opened = false, fired = false, audio = null;
+    var el, card, santa, openTimer, turnTimer, fartTimer, opened = false, turned = false, fired = false, audio = null;
 
     function snowcap() { document.body.classList.add('has-snowcap'); }
     // Le son doit être débloqué pendant un geste de l'utilisateur (toucher, clic, touche).
@@ -844,10 +859,11 @@
     }
 
     function show() {
-      opened = fired = false;
-      clearTimeout(openTimer); clearTimeout(fartTimer);
+      opened = turned = fired = false;
+      clearTimeout(openTimer); clearTimeout(turnTimer); clearTimeout(fartTimer);
       el.className = 'intro';
       card.classList.remove('is-open');
+      santa.classList.remove('is-turned');
       el.hidden = false;
       document.documentElement.classList.add('intro-open');
       window.scrollTo(0, 0);
@@ -857,6 +873,7 @@
       el.hidden = true;
       el.className = 'intro';
       card.classList.remove('is-open');
+      santa.classList.remove('is-turned');
       document.documentElement.classList.remove('intro-open');
     }
     function open() {
@@ -866,10 +883,18 @@
       ensureAudio();
       card.classList.add('is-open');
       el.classList.add('is-opened');
-      fartTimer = setTimeout(fart, 2300);
+      turnTimer = setTimeout(turn, 2600); // le Père Noël nous regarde d'abord, l'air malicieux
+    }
+    function turn() {
+      if (turned) return;
+      turned = true;
+      clearTimeout(turnTimer);
+      santa.classList.add('is-turned');
+      fartTimer = setTimeout(fart, 1500);
     }
     function fart() {
       if (fired) return;
+      if (!turned) { turn(); return; }
       fired = true;
       clearTimeout(fartTimer);
       ensureAudio();
@@ -889,18 +914,19 @@
       setTimeout(end, 3900);
     }
     function skip() {
-      clearTimeout(openTimer); clearTimeout(fartTimer);
-      opened = fired = true;
+      clearTimeout(openTimer); clearTimeout(turnTimer); clearTimeout(fartTimer);
+      opened = turned = fired = true;
       end();
       Snow.ambient();
       snowcap();
     }
-    function act() { if (!opened) open(); else fart(); }
+    function act() { if (!opened) open(); else if (!turned) turn(); else fart(); }
 
     return {
       init: function () {
         el = $('#intro');
         card = $('[data-pcard]', el);
+        santa = $('[data-santa]', el);
         $$('[data-pinup]', el).forEach(function (n) { n.innerHTML = pinupSVG(n.getAttribute('data-pinup')); });
         el.addEventListener('click', function (e) {
           if (e.target.closest('.intro__skip')) skip(); else act();
