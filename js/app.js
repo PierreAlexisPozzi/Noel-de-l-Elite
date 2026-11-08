@@ -839,14 +839,77 @@
       g += '<circle cx="169" cy="44" r="9" fill="' + trim + '"' + S + '/>';
     }
 
-    var body = elf ? g : '<g transform="translate(200 0) scale(-1 1)">' + g + '</g>';
+    // le haut, qu'elles jettent juste avant le pet
+    var top = '<path d="M66 150 C66 133 79 128 87 132 Q104 141 121 132 C129 128 142 133 142 150 C142 163 133 172 125 178 L83 178 C75 172 66 163 66 150 Z" fill="' + dress + '"' + S + '/>';
+    top += line('M104 141 L104 176', dressS, 1.6) + line('M80 160 Q86 170 96 172', dressS, 1.4) + line('M128 160 Q122 170 112 172', dressS, 1.4);
+    top += limb('M76 133 L78 120', 3.5, dress) + limb('M132 133 L130 120', 3.5, dress);
+    top += limb('M67 143 C70 130 83 128 104 139 C125 128 138 130 141 143', elf ? 4.5 : 6, trim);
+    if (elf) top += '<circle cx="104" cy="152" r="2.6" fill="' + gold + '"' + S + '/><circle cx="104" cy="164" r="2.6" fill="' + gold + '"' + S + '/>';
+
+    function mirror(x) { return elf ? x : '<g transform="translate(200 0) scale(-1 1)">' + x + '</g>'; }
     var vb = elf ? '36 -6 148 418' : '16 -6 148 418';
-    return '<svg viewBox="' + vb + '"><defs>' + defs + '</defs><g filter="url(#diecut)">' + body + '</g></svg>';
+    return '<svg viewBox="' + vb + '"><defs>' + defs + '</defs>' +
+      '<g filter="url(#diecut)">' + mirror(g) + '</g>' +
+      mirror('<g class="pin__top" filter="url(#diecut)">' + top + '</g>') + '</svg>';
+  }
+
+  function hohoho(ac, t0) {
+    // « Oh oh oh » de Père Noël : voix grave synthétisée (impulsions glottiques
+    // passées dans les formants de la voyelle « o »), trois syllabes qui descendent.
+    var comp = ac.createDynamicsCompressor();
+    comp.threshold.value = -14; comp.ratio.value = 8; comp.connect(ac.destination);
+    var master = ac.createGain(); master.gain.value = 1.4; master.connect(comp);
+    // un peu d'espace : écho court et sourd
+    var dl = ac.createDelay(); dl.delayTime.value = 0.085;
+    var fb = ac.createGain(); fb.gain.value = 0.22;
+    var dlp = ac.createBiquadFilter(); dlp.type = 'lowpass'; dlp.frequency.value = 1400;
+    dl.connect(dlp); dlp.connect(fb); fb.connect(dl); dlp.connect(master);
+    var bus = ac.createGain(); bus.connect(master); bus.connect(dl);
+
+    var formants = [[480, 1, 7], [820, 0.55, 8], [2600, 0.08, 10]]; // fréquence, gain, Q
+    var pitches = [124, 112, 98], step = 0.43, dur = 0.34;
+    var end = t0;
+    pitches.forEach(function (f0, i) {
+      var t = t0 + i * step, syl = dur + (i === 2 ? 0.14 : 0);
+      var filt = ac.createGain(); filt.connect(bus);
+      var bank = formants.map(function (f) {
+        var bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f[0]; bp.Q.value = f[2];
+        var g = ac.createGain(); g.gain.value = f[1]; bp.connect(g); g.connect(filt);
+        return bp;
+      });
+      // voix
+      var osc = ac.createOscillator(); osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(f0 * 1.08, t);
+      osc.frequency.linearRampToValueAtTime(f0, t + 0.08);
+      osc.frequency.linearRampToValueAtTime(f0 * 0.82, t + syl);
+      var vib = ac.createOscillator(); vib.frequency.value = 5.5;
+      var vibD = ac.createGain(); vibD.gain.value = 2.5; vib.connect(vibD); vibD.connect(osc.frequency);
+      var vEnv = ac.createGain(); vEnv.gain.setValueAtTime(0.0001, t);
+      vEnv.gain.setValueAtTime(0.0001, t + 0.045);
+      vEnv.gain.exponentialRampToValueAtTime(0.9, t + 0.1);
+      vEnv.gain.setValueAtTime(0.9, t + syl * 0.6);
+      vEnv.gain.exponentialRampToValueAtTime(0.0001, t + syl);
+      osc.connect(vEnv);
+      bank.forEach(function (bp) { vEnv.connect(bp); });
+      // « h » aspiré en attaque
+      var len = Math.floor(ac.sampleRate * 0.14), buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+      for (var k = 0; k < len; k++) d[k] = Math.random() * 2 - 1;
+      var nz = ac.createBufferSource(); nz.buffer = buf;
+      var hEnv = ac.createGain(); hEnv.gain.setValueAtTime(0.0001, t);
+      hEnv.gain.exponentialRampToValueAtTime(0.35, t + 0.03);
+      hEnv.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      nz.connect(hEnv); bank.forEach(function (bp) { hEnv.connect(bp); });
+      osc.start(t); vib.start(t); nz.start(t);
+      osc.stop(t + syl + 0.05); vib.stop(t + syl + 0.05); nz.stop(t + 0.14);
+      end = t + syl;
+    });
+    return end + 0.3 - t0;
   }
 
   /* ---------------- Ouverture : la carte pop-up du Père Noël ---------------- */
   var Intro = (function () {
-    var el, card, santa, openTimer, turnTimer, fartTimer, opened = false, turned = false, fired = false, audio = null;
+    var el, card, santa, openTimer, laughTimer, stripTimer, turnTimer, fartTimer, opened = false, turned = false, fired = false, audio = null;
+    function clearTimers() { [openTimer, laughTimer, stripTimer, turnTimer, fartTimer].forEach(clearTimeout); }
 
     function snowcap() { document.body.classList.add('has-snowcap'); }
     // L'animation se déroule seule. Le son, lui, n'est autorisé par les navigateurs qu'après
@@ -892,22 +955,22 @@
 
     function show() {
       opened = turned = fired = false;
-      clearTimeout(openTimer); clearTimeout(turnTimer); clearTimeout(fartTimer);
+      clearTimers();
       el.className = 'intro';
-      card.classList.remove('is-open');
-      santa.classList.remove('is-turned');
+      card.classList.remove('is-open', 'is-stripped');
+      santa.classList.remove('is-turned', 'is-laughing');
       el.hidden = false;
       document.documentElement.classList.add('intro-open');
       window.scrollTo(0, 0);
       ensureAudio(); // déjà autorisé si le visiteur a touché la page auparavant
       loadClip();
-      openTimer = setTimeout(open, 900);
+      openTimer = setTimeout(open, 1500); // laisse le temps de toucher l'écran pour avoir le son
     }
     function end() {
       el.hidden = true;
       el.className = 'intro';
-      card.classList.remove('is-open');
-      santa.classList.remove('is-turned');
+      card.classList.remove('is-open', 'is-stripped');
+      santa.classList.remove('is-turned', 'is-laughing');
       document.documentElement.classList.remove('intro-open');
     }
     function open() {
@@ -916,7 +979,16 @@
       clearTimeout(openTimer);
       card.classList.add('is-open');
       el.classList.add('is-opened');
-      turnTimer = setTimeout(turn, 2600); // le Père Noël nous regarde d'abord, l'air malicieux
+      laughTimer = setTimeout(laugh, 950); // dès que le Père Noël est debout
+    }
+    function laugh() {
+      santa.classList.add('is-laughing');
+      try { if (soundOn()) hohoho(audio, audio.currentTime + 0.02); } catch (e) { /* pas de son */ }
+      stripTimer = setTimeout(strip, 1450); // à la fin du « oh oh oh »
+    }
+    function strip() {
+      card.classList.add('is-stripped');
+      turnTimer = setTimeout(turn, 750);
     }
     function turn() {
       if (turned) return;
@@ -947,7 +1019,7 @@
       setTimeout(end, 6000);
     }
     function skip() {
-      clearTimeout(openTimer); clearTimeout(turnTimer); clearTimeout(fartTimer);
+      clearTimers();
       opened = turned = fired = true;
       end();
       Snow.ambient();
