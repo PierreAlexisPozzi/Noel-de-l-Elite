@@ -863,6 +863,30 @@
       syncHint();
     }
     function soundOn() { return !!audio && audio.state === 'running'; }
+
+    // Le pet : extrait audio (3 s), chargé dès l'ouverture. Repli sur le pet synthétisé si besoin.
+    var CLIP_URL = 'audio/prout-de-noel.mp3?v=11', clip = null, clipLoading = false;
+    function loadClip() {
+      if (clip || clipLoading || !audio || !window.fetch) return;
+      clipLoading = true;
+      fetch(CLIP_URL)
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+        .then(function (ab) {
+          // forme à callbacks : compatible avec les anciens Safari
+          audio.decodeAudioData(ab, function (buf) { clip = buf; }, function () { clipLoading = false; });
+        })
+        .catch(function () { clipLoading = false; });
+    }
+    function playFart(when) {
+      if (clip) {
+        var src = audio.createBufferSource(), g = audio.createGain();
+        src.buffer = clip; g.gain.value = 1;
+        src.connect(g); g.connect(audio.destination);
+        src.start(when);
+      } else {
+        fartSound(audio, when);
+      }
+    }
     function syncHint() { if (el) el.classList.toggle('is-sound-on', soundOn()); }
 
     function show() {
@@ -875,6 +899,7 @@
       document.documentElement.classList.add('intro-open');
       window.scrollTo(0, 0);
       ensureAudio(); // déjà autorisé si le visiteur a touché la page auparavant
+      loadClip();
       openTimer = setTimeout(open, 900);
     }
     function end() {
@@ -904,7 +929,7 @@
       if (!turned) { turn(); return; }
       fired = true;
       clearTimeout(fartTimer);
-      try { if (soundOn()) fartSound(audio, audio.currentTime + 0.38); } catch (e) { /* pas de son, tant pis */ }
+      try { if (soundOn()) playFart(audio.currentTime + 0.35); } catch (e) { /* pas de son, tant pis */ }
 
       el.classList.add('is-tension');
       setTimeout(function () {
@@ -916,8 +941,9 @@
           setTimeout(function () { Snow.burst(x, y, w[1]); }, w[0]);
         });
       }, 380);
-      setTimeout(function () { el.classList.add('is-leaving'); snowcap(); }, 2900);
-      setTimeout(end, 3900);
+      // l'extrait dure 3 s : la carte tombe pendant ses dernières notes
+      setTimeout(function () { el.classList.add('is-leaving'); snowcap(); }, 3300);
+      setTimeout(end, 4300);
     }
     function skip() {
       clearTimeout(openTimer); clearTimeout(turnTimer); clearTimeout(fartTimer);
