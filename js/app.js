@@ -1002,14 +1002,14 @@
       turned = true;
       clearTimeout(turnTimer);
       santa.classList.add('is-turned');
-      fartTimer = setTimeout(fart, 1500);
+      fartTimer = setTimeout(fart, 600); // pète dès la fin du demi-tour
     }
     function fart() {
       if (fired) return;
       if (!turned) { turn(); return; }
       fired = true;
       clearTimeout(fartTimer);
-      try { if (soundOn()) playFart(audio.currentTime + 0.35); } catch (e) { /* pas de son, tant pis */ }
+      try { if (soundOn()) playFart(audio.currentTime + 0.12); } catch (e) { /* pas de son, tant pis */ }
 
       el.classList.add('is-tension');
       setTimeout(function () {
@@ -1020,7 +1020,7 @@
         [[0, 80], [150, 60], [320, 45], [520, 35], [760, 30], [1000, 25]].forEach(function (w) {
           setTimeout(function () { Snow.burst(x, y, w[1]); }, w[0]);
         });
-      }, 380);
+      }, 120);
       // l'extrait dure 5 s : la carte tombe pendant ses dernières notes
       setTimeout(function () { el.classList.add('is-leaving'); snowcap(); }, 5000);
       setTimeout(end, 6000);

@@ -723,7 +723,7 @@ html.intro-open { overflow: hidden; }
 .pop--santa { left: 32%; width: 36%; --z: var(--depth); --delay: .85s; transform-style: preserve-3d; }
 
 /* ---- Le Père Noël : de face, puis demi-tour ---- */
-.santa { position: relative; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.5,-.2,.3,1.25); }
+.santa { position: relative; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.5,-.2,.3,1.25); }
 .santa.is-turned { transform: rotateY(180deg); }
 .santa__face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .santa__face--back { position: absolute; inset: 0; transform: rotateY(180deg); }
