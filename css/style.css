@@ -599,12 +599,12 @@ html.intro-open { overflow: hidden; }
   background: radial-gradient(ellipse at 50% 40%, #1f3f2c 0%, var(--table) 60%, #0b1810 100%);
   transition: opacity .9s ease;
 }
-.intro__kicker { margin: 0; font-family: var(--f-type); font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; opacity: .65; }
-.intro__title { margin: .3em 0 0; font-family: var(--f-display); font-style: italic; font-size: clamp(1.5rem, 5vw, 2.4rem); line-height: 1.15; }
+.intro__kicker { position: absolute; top: 48px; left: 16px; right: 16px; margin: 0; font-family: var(--f-type); font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; opacity: .65; }
+.intro__title { position: absolute; top: 68px; left: 16px; right: 16px; margin: 0; font-family: var(--f-display); font-style: italic; font-size: clamp(1.5rem, 5vw, 2.4rem); line-height: 1.15; }
 .intro__hint { position: absolute; top: 14px; left: 16px; right: 16px; margin: 0; font-family: var(--f-type); font-size: .8rem; letter-spacing: .08em; opacity: .7; animation: hint-blink 1.6s ease-in-out infinite; }
 @keyframes hint-blink { 50% { opacity: .3; } }
 .intro__skip {
-  position: absolute; right: 16px; bottom: 16px;
+  position: absolute; z-index: 5; right: 16px; bottom: 16px;
   padding: 8px 14px; border: 1px solid rgba(243,234,215,.4); background: transparent;
   font-family: var(--f-type); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--paper); opacity: .7; cursor: pointer;
@@ -615,7 +615,7 @@ html.intro-open { overflow: hidden; }
 
 .intro__stage {
   position: relative;
-  margin-top: calc(min(660px, 92vw, 74vh) * .07);
+  margin-top: calc(min(660px, 92vw, 74vh) * .1);
   perspective: 1500px;
   perspective-origin: 50% 0%;
   transition: transform .9s cubic-bezier(.55,0,.8,.2), opacity .9s ease;
@@ -734,6 +734,30 @@ html.intro-open { overflow: hidden; }
 .santa.is-laughing .santa__mouth { animation: laugh .43s ease-in-out infinite; }
 @keyframes laugh { 50% { transform: scaleY(2.4); } }
 
+/* ---- Rennes en orbite autour de la scène ----
+   Chaque renne est une découpe tangente au cercle : de profil devant
+   (il file vers la droite), vu de l'autre côté derrière (il revient vers la gauche). */
+.orbit {
+  --r: calc(var(--w) * .52);
+  position: absolute; left: 50%; top: calc(var(--h) * -.08); width: 0; height: 0;
+  transform-style: preserve-3d;
+  transform: translateZ(calc(var(--depth) * .5)) rotateX(-20deg) rotateY(0deg);
+  animation: orbit 9s linear infinite;
+}
+@keyframes orbit {
+  from { transform: translateZ(calc(var(--depth) * .5)) rotateX(-20deg) rotateY(0deg); }
+  to   { transform: translateZ(calc(var(--depth) * .5)) rotateX(-20deg) rotateY(360deg); }
+}
+.orbit__arm { position: absolute; transform-style: preserve-3d; transform: rotateY(var(--a)) translateZ(var(--r)); }
+.reindeer {
+  position: absolute;
+  width: calc(var(--w) * .23); left: calc(var(--w) * -.115); top: calc(var(--w) * -.08);
+  opacity: 0; transition: opacity .6s ease .9s;
+}
+.pcard.is-open .reindeer { opacity: 1; }
+.reindeer svg { display: block; width: 100%; height: auto; overflow: visible; animation: gallop .5s ease-in-out var(--bob, 0s) infinite; }
+@keyframes gallop { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-6px) rotate(3deg); } }
+
 /* ---- Les pin-ups jettent leur haut ---- */
 .pin__top { transform-box: fill-box; transform-origin: 50% 50%; }
 .pcard.is-stripped .pin__top { animation: throw-top 1.2s cubic-bezier(.3,.6,.4,1) forwards; }
@@ -833,6 +857,7 @@ html.intro-open { overflow: hidden; }
   .pop--elf { left: 0; } .pop--claus { right: 0; }
   .pop--santa { left: 24%; width: 52%; }
   .pcard__banner { top: 4%; }
+  .reindeer { width: calc(var(--w) * .3); left: calc(var(--w) * -.15); top: calc(var(--w) * -.1); }
   .pcard.is-open .pcard__cover { transform: translateZ(0) rotateX(-114deg); }
   .pcard__face--in { padding-top: calc(var(--h) * .42); }
   .pcard__note { font-size: calc(var(--w) * .085); }

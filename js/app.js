@@ -715,6 +715,43 @@
     return end - t0;
   }
 
+  /* ---------------- Rennes volants (SVG dessinés à la main) ----------------
+     Dessinés de profil, tournés vers la droite ; un sucre d'orge sous le ventre. */
+  function reindeerSVG() {
+    var ink = '#3a2318', fur = '#8a5a35', light = '#c99b6d', antler = '#e1c08f';
+    var S = ' stroke="' + ink + '" stroke-width="2" stroke-linejoin="round"';
+    function line(d, color, w, extra) { return '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"' + (extra || '') + '/>'; }
+    function limb(d, w, color) { return line(d, ink, w + 3) + line(d, color, w); }
+    var g = '';
+    // pattes arrière et avant, tendues comme au galop
+    g += limb('M52 86 Q34 98 14 102', 8, fur) + limb('M62 90 Q46 106 28 114', 8, fur);
+    g += limb('M126 84 Q146 92 166 88', 8, fur) + limb('M118 90 Q138 104 156 106', 8, fur);
+    g += '<ellipse cx="12" cy="102" rx="5" ry="4" fill="' + ink + '"/><ellipse cx="26" cy="115" rx="5" ry="4" fill="' + ink + '"/>';
+    g += '<ellipse cx="168" cy="88" rx="5" ry="4" fill="' + ink + '"/><ellipse cx="158" cy="107" rx="5" ry="4" fill="' + ink + '"/>';
+    // le sucre d'orge
+    var cane = 'M100 94 L116 122 Q121 131 129 127 Q136 123 131 115';
+    g += line(cane, ink, 9) + line(cane, '#fbf6ec', 6.5) + line(cane, '#b3242a', 6.5, ' stroke-dasharray="4 4"');
+    // queue
+    g += '<circle cx="38" cy="64" r="8" fill="#fbf6ec"' + S + '/>';
+    // corps
+    g += '<path d="M40 70 C40 52 70 46 100 48 C126 50 140 58 142 72 C144 88 128 98 100 98 C70 98 40 92 40 70 Z" fill="' + fur + '"' + S + '/>';
+    g += '<path d="M60 89 C80 97 116 97 132 85 C126 94 112 97 98 97 C82 97 70 94 60 89 Z" fill="' + light + '"/>';
+    // cou, oreille, tête
+    g += '<path d="M122 62 C128 46 136 36 146 30 L162 40 C154 48 148 60 142 72 Z" fill="' + fur + '"' + S + '/>';
+    g += '<path d="M150 22 Q138 14 134 20 Q138 28 152 28 Z" fill="' + fur + '"' + S + '/>';
+    g += '<ellipse cx="162" cy="32" rx="19" ry="13" fill="' + fur + '"' + S + ' transform="rotate(14 162 32)"/>';
+    g += '<ellipse cx="178" cy="40" rx="11" ry="8" fill="' + light + '"' + S + '/>';
+    g += '<ellipse cx="188" cy="37" rx="5" ry="4.2" fill="' + ink + '"/>';
+    g += line('M157 27 Q161 23 165 27', ink, 2.2) + line('M173 46 Q178 50 183 46', ink, 1.6);
+    // bois
+    var a1 = 'M155 21 Q149 6 139 0 M150 10 L142 8 M146 4 Q147 -3 151 -5';
+    var a2 = 'M165 21 Q169 6 179 0 M170 10 L178 9 M174 4 Q176 -3 172 -6';
+    g += line(a1, ink, 6.5) + line(a2, ink, 6.5) + line(a1, antler, 4) + line(a2, antler, 4);
+    // collier à grelot
+    g += line('M127 64 Q137 57 146 66', '#b01f26', 6) + '<circle cx="137" cy="69" r="4.5" fill="#d9a73a"' + S + '/>';
+    return '<svg viewBox="-6 -10 204 150"><g filter="url(#diecut)">' + g + '</g></svg>';
+  }
+
   /* ---------------- Pin-ups de la carte (SVG dessinés à la main) ----------------
      Même silhouette pour les deux : la Mère Noël est la version miroir, autrement habillée.
      Seins nus, chaque téton caché par une petite tête de lutin. */
@@ -1039,6 +1076,7 @@
         card = $('[data-pcard]', el);
         santa = $('[data-santa]', el);
         $$('[data-pinup]', el).forEach(function (n) { n.innerHTML = pinupSVG(n.getAttribute('data-pinup')); });
+        $$('[data-reindeer]', el).forEach(function (n) { n.innerHTML = reindeerSVG(); });
         el.addEventListener('click', function (e) {
           if (e.target.closest('.intro__skip')) skip(); else ensureAudio();
         });
