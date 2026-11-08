@@ -10,9 +10,9 @@ window.NOEL_CONFIG = {
   evenement: {
     // Format ISO : "2026-12-11" (jour seul) ou "2026-12-11T19:30:00" (avec l'heure).
     // null = compte à rebours vers le 25 décembre.
-    date: "2026-12-11",
+    date: "2026-12-11T19:30:00",
     lieu: "Vini Monte",
-    budget: "",          // ex. "30 €"
+    budget: "20 €",
     tenue: "Pull de Noël de rigueur",
   },
 
