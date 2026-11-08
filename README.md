@@ -14,11 +14,11 @@ Test en local : `python3 -m http.server` puis http://localhost:8000
 
 ## Ouverture du site
 
-À la première visite (une fois par session), le Père Noël montre ses fesses et lâche un pet : le son est synthétisé dans le navigateur (aucun fichier audio), et la neige qui en sort continue ensuite de tomber sur la gazette, en se déposant sur le haut de la page.
+À chaque ouverture de la gazette, le Père Noël montre ses fesses et lâche un pet : le son est synthétisé dans le navigateur (aucun fichier audio), et la neige qui en sort continue ensuite de tomber sur la gazette, en se déposant sur le haut de la page.
 
 - Toucher l'écran ou appuyer sur Entrée déclenche le pet avec le son. Sans interaction, il part tout seul au bout de 5 s, mais sans le son, que les navigateurs bloquent tant qu'on n'a pas touché la page.
 - « Passer » ou Échap pour sauter l'animation ; « Réécouter le message du Père Noël » en bas de page pour la rejouer.
-- Pas d'ouverture sur les liens de révélation, ni pour les personnes qui ont désactivé les animations dans leur système.
+- Pas d'ouverture sur les liens de révélation. Elle est jouée même si le téléphone a les animations réduites.
 
 ## Configuration : `js/config.js`
 

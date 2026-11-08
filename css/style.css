@@ -738,5 +738,7 @@ body.has-snowcap .snowcap { transform: scaleY(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
+  /* l'ouverture et la neige sont volontairement exclues */
+  .sheet *, .sheet *::before, .sheet *::after,
+  .reveal *, .reveal *::before, .reveal *::after, .toast { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
 }

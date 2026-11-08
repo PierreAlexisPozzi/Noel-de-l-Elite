@@ -536,7 +536,6 @@
 
     function setup() {
       if (ctx) return true;
-      if (reduceMotion) return false;
       cv = $('#snow');
       if (!cv || !cv.getContext) return false;
       ctx = cv.getContext('2d');
@@ -655,11 +654,8 @@
 
   /* ---------------- Ouverture : le message du Père Noël ---------------- */
   var Intro = (function () {
-    var KEY = 'noel-elite:intro-vue';
     var el, timer, fired = false, audio = null;
 
-    function seen() { try { return sessionStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
-    function markSeen() { try { sessionStorage.setItem(KEY, '1'); } catch (e) { /* ignore */ } }
     function snowcap() { document.body.classList.add('has-snowcap'); }
 
     function show() {
@@ -681,7 +677,6 @@
       if (fired) return;
       fired = true;
       clearTimeout(timer);
-      markSeen();
       try {
         var AC = window.AudioContext || window.webkitAudioContext;
         if (AC) {
@@ -707,7 +702,6 @@
     function skip() {
       clearTimeout(timer);
       fired = true;
-      markSeen();
       end();
       Snow.ambient();
       snowcap();
@@ -725,7 +719,8 @@
           else if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button')) { e.preventDefault(); fart(); }
         });
       },
-      shouldPlay: function () { return !reduceMotion && !seen(); },
+      // À chaque ouverture de la gazette, y compris si le téléphone a les animations réduites.
+      shouldPlay: function () { return true; },
       show: show,
       skip: skip
     };
