@@ -107,7 +107,9 @@
   /* ---------------- Informations de la soirée ---------------- */
   function eventDate() {
     if (!EV.date) return null;
-    var d = new Date(EV.date);
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(EV.date));
+    // Jour seul : interprété en heure locale (et non en UTC comme le ferait new Date()).
+    var d = m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(EV.date);
     return isNaN(d) ? null : d;
   }
   function factValue(key) {
