@@ -110,7 +110,18 @@ html.intro-open { overflow: hidden; }
   font-family: var(--f-display);
   font-style: italic;
   font-size: 1.15rem;
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 18px;
 }
+.masthead__jump {
+  font-family: var(--f-type); font-style: normal; font-size: .8rem;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--berry); text-decoration: none;
+  border-bottom: 1px solid currentColor; padding-bottom: 1px;
+}
+.masthead__jump:hover, .masthead__jump:focus-visible { color: var(--berry-deep); border-bottom-style: double; border-bottom-width: 3px; }
+
+html { scroll-behavior: smooth; }
+#tirage { scroll-margin-top: 16px; }
 
 /* ---------- Typo commune ---------- */
 .kicker {
@@ -910,6 +921,7 @@ body.has-snowcap .snowcap { transform: scaleY(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   /* l'ouverture et la neige sont volontairement exclues */
   .sheet *, .sheet *::before, .sheet *::after,
   .reveal *, .reveal *::before, .reveal *::after, .toast { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
