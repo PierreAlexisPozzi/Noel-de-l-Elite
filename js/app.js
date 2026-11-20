@@ -205,31 +205,87 @@
 
   function renderAll() { renderRoll(); renderDraw(); }
 
-  /* ---------------- Vue missive ---------------- */
+  /* ---------------- Vue missive ----------------
+     La missive est précédée de l'animation d'ouverture : après le pet, une enveloppe
+     surgit du fond de la carte, vole jusqu'au premier plan et s'ouvre sur le nom. */
+  var autoOpenTimer;
+  function openEnvelope() {
+    var env = $('[data-envelope]');
+    clearTimeout(autoOpenTimer);
+    if (env.classList.contains('is-open')) return;
+    env.classList.add('is-open');
+    $('[data-reveal-hint]').style.opacity = '0';
+    setTimeout(function () { $('[data-reveal-details]').hidden = false; }, reduceMotion ? 0 : 1700);
+  }
+
   function showReveal(token) {
     $('#view-home').hidden = true;
     var view = $('#view-reveal');
     view.hidden = false;
+    view.classList.remove('is-staged');
     window.scrollTo(0, 0);
     var data = openToken(token);
     $('[data-reveal-ok]').hidden = !data;
     $('[data-reveal-error]').hidden = !!data;
-    if (!data) { document.title = 'Missive illisible · Le Noël de l’Élite'; return; }
+    if (!data) { document.title = 'Missive illisible · Le Noël de l’Élite'; return null; }
 
     document.title = 'Une missive pour ' + data.f + ' · Le Noël de l’Élite';
     $$('[data-from]', view).forEach(function (n) { n.textContent = data.f; });
     $('[data-to]', view).textContent = data.t;
 
-    var env = $('[data-envelope]'), seal = $('[data-seal]');
-    env.classList.remove('is-open');
+    clearTimeout(autoOpenTimer);
+    $('[data-envelope]').classList.remove('is-open', 'is-flying');
     $('[data-reveal-details]').hidden = true;
     $('[data-reveal-hint]').style.opacity = '';
-    seal.onclick = function () {
-      env.classList.add('is-open');
-      $('[data-reveal-hint]').style.opacity = '0';
-      setTimeout(function () { $('[data-reveal-details]').hidden = false; }, reduceMotion ? 0 : 1700);
-    };
+    $('[data-seal]').onclick = openEnvelope;
+    return data;
   }
+
+  // Le vol de l'enveloppe, du fond de la carte pop-up jusqu'au premier plan.
+  var Letter = (function () {
+    var view, env, anim = null, landed = true;
+    function stage() {
+      view = $('#view-reveal'); env = $('[data-envelope]');
+      landed = false;
+      view.classList.add('is-staged'); // seule l'enveloppe en vol est visible, par-dessus la scène
+    }
+    function land() {
+      if (landed) return;
+      landed = true;
+      env.classList.remove('is-flying');
+      view.classList.remove('is-staged');
+      autoOpenTimer = setTimeout(openEnvelope, 1300); // le sceau cède de lui-même
+    }
+    function fly(from, done) {
+      if (landed) { done(); return; }
+      var r = env.getBoundingClientRect();
+      var dx = from.left + from.width / 2 - (r.left + r.width / 2);
+      var dy = from.top + from.height / 2 - (r.top + r.height / 2);
+      env.classList.add('is-flying');
+      if (!env.animate) { land(); done(); return; }
+      function k(x, y, sc, rot, op, glow, br) {
+        return {
+          transform: 'translate(' + x + 'px, ' + y + 'px) scale(' + sc + ') rotate(' + rot + 'deg)',
+          opacity: op,
+          filter: 'brightness(' + br + ') drop-shadow(0 0 ' + glow + 'px rgba(255, 214, 140, .9))'
+        };
+      }
+      var f1 = k(dx, dy, .03, -14, 0, 0, .5);
+      var f2 = k(dx, dy + 22, .07, -8, 1, 10, .7); f2.offset = .12; // elle tombe d'abord sous le renne
+      var f3 = k(dx * .55 - 30, dy * .55 - 50, .3, 10, 1, 16, .85); f3.offset = .48;
+      var f4 = k(0, 0, 1.08, -2, 1, 6, 1); f4.offset = .86;
+      var f5 = k(0, 0, 1, 0, 1, 0, 1);
+      anim = env.animate([f1, f2, f3, f4, f5], { duration: 2600, easing: 'cubic-bezier(.45, 0, .35, 1)', fill: 'both' });
+      anim.onfinish = function () { anim.cancel(); anim = null; land(); done(); };
+    }
+    function skip() {
+      if (landed) return;
+      if (anim) { anim.onfinish = null; anim.cancel(); anim = null; }
+      land();
+      if (env.animate) env.animate([{ transform: 'scale(.6)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 450, easing: 'ease-out' });
+    }
+    return { stage: stage, fly: fly, skip: skip };
+  })();
 
   function showHome() {
     $('#view-reveal').hidden = true;
@@ -237,9 +293,16 @@
     document.title = 'Le Noël de l’Élite';
   }
 
-  function route() {
+  function route(first) {
     var m = location.hash.match(/^#\/m\/([A-Za-z0-9_-]+)/);
-    if (m) showReveal(m[1]); else showHome();
+    if (m) {
+      var data = showReveal(m[1]);
+      if (data) { Letter.stage(); Intro.show({ letter: Letter, title: 'Le Père Noël a une missive pour ' + data.f }); }
+      else Intro.skip();
+    } else {
+      showHome();
+      if (first === true) Intro.show();
+    }
   }
 
   /* ---------------- Neige ----------------
@@ -462,7 +525,9 @@
     g += line(a1, ink, 6.5) + line(a2, ink, 6.5) + line(a1, antler, 4) + line(a2, antler, 4);
     // collier à grelot
     g += line('M127 64 Q137 57 146 66', '#b01f26', 6) + '<circle cx="137" cy="69" r="4.5" fill="#d9a73a"' + S + '/>';
-    return '<svg viewBox="-6 -10 204 150"><g filter="url(#diecut)">' + g + '</g></svg>';
+    // point invisible sous le ventre, entre les pattes arrière : d'où sort la missive
+    return '<svg viewBox="-6 -10 204 150"><g filter="url(#diecut)">' + g + '</g>' +
+      '<circle class="reindeer__origin" cx="64" cy="95" r="1" fill="none" stroke="none"/></svg>';
   }
 
   /* ---------------- Pin-ups de la carte (SVG dessinés à la main) ----------------
@@ -658,8 +723,9 @@
 
   /* ---------------- Ouverture : la carte pop-up du Père Noël ---------------- */
   var Intro = (function () {
-    var el, card, santa, openTimer, laughTimer, stripTimer, turnTimer, fartTimer, opened = false, turned = false, fired = false, audio = null;
-    function clearTimers() { [openTimer, laughTimer, stripTimer, turnTimer, fartTimer].forEach(clearTimeout); }
+    var el, card, santa, openTimer, laughTimer, stripTimer, turnTimer, fartTimer, letterTimer, opened = false, turned = false, fired = false, audio = null;
+    var opts = {}, titleEl, defaultTitle;
+    function clearTimers() { [openTimer, laughTimer, stripTimer, turnTimer, fartTimer, letterTimer].forEach(clearTimeout); }
 
     function snowcap() { document.body.classList.add('has-snowcap'); }
     // L'animation se déroule seule. Le son, lui, n'est autorisé par les navigateurs qu'après
@@ -702,7 +768,10 @@
     function playFart(when) { if (buffers.fart) playBuffer(buffers.fart, when); else fartSound(audio, when); }
     function syncHint() { if (el) el.classList.toggle('is-sound-on', soundOn()); }
 
-    function show() {
+    // opts.letter : missive à faire surgir à la fin (au lieu de revenir à la gazette)
+    function show(o) {
+      opts = o || {};
+      titleEl.textContent = opts.title || defaultTitle;
       opened = turned = fired = false;
       clearTimers();
       el.className = 'intro';
@@ -771,13 +840,38 @@
           setTimeout(function () { Snow.burst(x, y, w[1]); }, w[0]);
         });
       }, 120);
+      if (opts.letter) {
+        // la scène s'estompe tandis que le renne le plus proche lâche la missive
+        var letter = opts.letter;
+        letterTimer = setTimeout(function () {
+          el.classList.add('is-receding');
+          var from = letterOrigin();
+          Snow.burst(from.left + from.width / 2, from.top + from.height / 2, 18);
+          letter.fly(from, function () {
+            el.classList.add('is-fading');
+            letterTimer = setTimeout(end, 900);
+          });
+        }, 1900);
+        return;
+      }
       // l'extrait dure 5 s : la carte tombe pendant ses dernières notes
       setTimeout(function () { el.classList.add('is-leaving'); snowcap(); }, 5000);
       setTimeout(end, 6000);
     }
+    // Sous le ventre du renne le plus proche (le plus grand à l'écran), entre ses pattes arrière.
+    function letterOrigin() {
+      var best = null, bestW = 0;
+      $$('.reindeer__origin', el).forEach(function (o) {
+        var w = o.closest('.reindeer').getBoundingClientRect().width, r = o.getBoundingClientRect();
+        if (r.top < 0 || r.left < 0 || r.right > window.innerWidth || r.bottom > window.innerHeight) return;
+        if (w > bestW) { bestW = w; best = r; }
+      });
+      return best || $('.pcard__banner', el).getBoundingClientRect();
+    }
     function skip() {
       clearTimers();
       opened = turned = fired = true;
+      if (opts.letter) opts.letter.skip();
       end();
       Snow.ambient();
       snowcap();
@@ -788,6 +882,8 @@
         el = $('#intro');
         card = $('[data-pcard]', el);
         santa = $('[data-santa]', el);
+        titleEl = $('.intro__title', el);
+        defaultTitle = titleEl.textContent;
         $$('[data-pinup]', el).forEach(function (n) { n.innerHTML = pinupSVG(n.getAttribute('data-pinup')); });
         $$('[data-reindeer]', el).forEach(function (n) { n.innerHTML = reindeerSVG(); });
         el.addEventListener('click', function (e) {
@@ -812,13 +908,10 @@
     startCountdown();
     renderAll();
 
-    window.addEventListener('hashchange', route);
-    route();
-
     Intro.init();
     $('[data-replay-intro]').addEventListener('click', function () { Intro.show(); });
-    if (!/^#\/m\//.test(location.hash) && Intro.shouldPlay()) Intro.show();
-    else Intro.skip();
+    window.addEventListener('hashchange', function () { route(false); });
+    route(true);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
