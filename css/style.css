@@ -466,7 +466,8 @@ html { scroll-behavior: smooth; }
    Vue « missive »
    ============================================================ */
 .reveal {
-  position: relative; z-index: 1;
+  /* au-dessus de l'animation d'ouverture (100) : l'enveloppe en vol passe devant la scène */
+  position: relative; z-index: 110;
   min-height: 100vh;
   display: flex; flex-direction: column; align-items: center;
   padding: 40px 16px 48px;
@@ -475,7 +476,15 @@ html { scroll-behavior: smooth; }
 }
 .reveal__kicker { font-family: var(--f-type); font-size: .8rem; letter-spacing: .16em; text-transform: uppercase; opacity: .7; margin: 0 0 18px; }
 .reveal__title { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1.1; }
-.reveal__hint { font-style: italic; opacity: .8; margin: .6rem 0 0; transition: opacity .3s; }
+.reveal__hint { font-style: italic; opacity: .8; margin: .6rem 0 0; transition: opacity .6s; }
+.reveal__kicker, .reveal__title, .reveal__back { transition: opacity .8s ease; }
+
+/* Pendant l'animation : seule l'enveloppe en vol apparaît, par-dessus la carte pop-up */
+.reveal.is-staged { pointer-events: none; }
+.reveal.is-staged .reveal__kicker, .reveal.is-staged .reveal__title,
+.reveal.is-staged .reveal__hint, .reveal.is-staged .reveal__back { opacity: 0; }
+.reveal.is-staged .envelope:not(.is-flying) { visibility: hidden; }
+.envelope.is-flying { will-change: transform, opacity, filter; }
 .reveal [data-reveal-ok] { display: flex; flex-direction: column; align-items: center; width: 100%; }
 
 .envelope {
@@ -862,6 +871,14 @@ html { scroll-behavior: smooth; }
 .intro.is-leaving .intro__kicker, .intro.is-leaving .intro__title,
 .intro.is-leaving .intro__hint, .intro.is-leaving .intro__skip { opacity: 0; }
 .intro.is-leaving .intro__stage { transform: translateY(90vh) rotate(8deg); opacity: 0; }
+
+/* 3 bis. sur un lien de missive : la scène s'estompe, la missive en surgit */
+.intro.is-receding .intro__stage { transform: scale(.94); opacity: .4; transition: transform 2.6s ease, opacity 2.6s ease; }
+/* les rennes marquent l'arrêt : l'un d'eux lâche la missive */
+.intro.is-receding .orbit { animation-play-state: paused; }
+.intro.is-receding .intro__kicker, .intro.is-receding .intro__title,
+.intro.is-receding .intro__hint { opacity: 0; }
+.intro.is-fading { opacity: 0; transition: opacity .9s ease; pointer-events: none; }
 
 @media (max-width: 560px) {
   .pcard { --h: calc(var(--w) * .86); --depth: calc(var(--w) * .12); }
