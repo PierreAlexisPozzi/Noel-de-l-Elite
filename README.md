@@ -19,7 +19,8 @@ Test en local : `python3 -m http.server` puis http://localhost:8000
 - Tout s'enchaîne seul, sans action : ouverture de la carte, Père Noël de face, demi-tour, pet (environ 5 s), puis la gazette.
 - Les navigateurs bloquent le son tant qu'on n'a pas touché la page : un toucher n'importe où (ou une touche du clavier) l'active, sans changer le rythme. Un message l'indique tant que le son est coupé.
 - « Passer » ou Échap pour sauter l'animation ; « Réécouter le message du Père Noël » en bas de page pour la rejouer.
-- Pas d'ouverture sur les liens de révélation. Elle est jouée même si le téléphone a les animations réduites.
+- Elle est jouée même si le téléphone a les animations réduites.
+- **Sur un lien de missive**, la même animation précède la révélation, avec une autre fin : après le pet, les rennes s'arrêtent, le plus proche lâche l'enveloppe scellée (elle sort de sous son ventre, entre ses pattes arrière), qui tombe puis vole jusqu'au premier plan pendant que la scène s'estompe ; le sceau cède alors de lui-même et la lettre sort sur le nom. « Passer » amène directement à l'enveloppe, qui s'ouvre aussitôt. Un lien abîmé affiche directement « Missive illisible », sans animation.
 
 ## Configuration : `js/config.js`
 

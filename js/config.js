@@ -18,13 +18,22 @@ window.NOEL_CONFIG = {
 
   // Liste des convives, affichée sur le site (qui ne permet plus de la modifier).
   participants: [
-    "Mathis", "Dani", "Vianney", "Ikram", "Boris",
-    "Zoé", "Aurélien", "Mathilde", "PA", "Coralie",
+    "Poolette", "Tibo", "Coralie", "PA", "Zoé", "Boris",
+    "Laurie", "Arthur", "Alex", "Hugo", "Dani", "Mathis",
+    "Ikram", "Vianney", "Mathilde", "Aurélien",
   ],
 
   // Paires qui ne doivent pas se tirer mutuellement (couples, etc.).
   // ex. [["Camille", "Thomas"]]
-  exclusions: [],
+  exclusions: [
+    ["Poolette", "Tibo"],
+    ["Coralie", "PA"],
+    ["Zoé", "Boris"],
+    ["Laurie", "Arthur"],
+    ["Dani", "Mathis"],
+    ["Ikram", "Vianney"],
+    ["Mathilde", "Aurélien"],
+  ],
 
   // Interdit les échanges croisés (A offre à B ET B offre à A).
   interdireEchangesCroises: true,
