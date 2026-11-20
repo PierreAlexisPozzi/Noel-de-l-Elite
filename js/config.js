@@ -19,7 +19,7 @@ window.NOEL_CONFIG = {
   // Liste des convives, affichée sur le site (qui ne permet plus de la modifier).
   participants: [
     "Poolette", "Tibo", "Coralie", "PA", "Zoé", "Boris",
-    "Laurie", "Arthur", "Alex", "Hugo", "Dani", "Mathis",
+    "Laurie", "Arthur", "Alex", "Hugo", "Mathis",
     "Ikram", "Vianney", "Mathilde", "Aurélien",
   ],
 
@@ -30,7 +30,6 @@ window.NOEL_CONFIG = {
     ["Coralie", "PA"],
     ["Zoé", "Boris"],
     ["Laurie", "Arthur"],
-    ["Dani", "Mathis"],
     ["Ikram", "Vianney"],
     ["Mathilde", "Aurélien"],
   ],
@@ -44,5 +43,5 @@ window.NOEL_CONFIG = {
 
   // Clé servant à brouiller les liens secrets. À changer une fois, AVANT le tirage :
   // la modifier après rend les liens déjà envoyés illisibles.
-  secret: "elite-2026",
+  secret: "elite-2026-b",  // changée au 2e tirage (sans Dani) : les liens du 1er tirage sont illisibles
 };
